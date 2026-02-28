@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as bcrypt from 'bcrypt';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@ter-aseramik.com';
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'; // Production'da güvenli hash kullan!
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 
 // Simple session store (production'da database veya Redis kullan)
 const sessions = new Map<string, { email: string; expiresAt: number }>();
 
 function generateSessionToken(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return require('crypto').randomBytes(32).toString('hex');
 }
 
 export async function GET(request: NextRequest) {
@@ -37,32 +37,43 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      const token = generateSessionToken();
-      const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 saat
-
-      sessions.set(token, { email, expiresAt });
-
-      const response = NextResponse.json({
-        success: true,
-        email: email,
-        message: 'Başarıyla giriş yaptınız',
-      });
-
-      response.cookies.set('adminToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60,
-      });
-
-      return response;
+    // Validate email
+    if (email !== ADMIN_EMAIL) {
+      return NextResponse.json(
+        { success: false, error: 'Geçersiz e-posta veya şifre' },
+        { status: 401 }
+      );
     }
 
-    return NextResponse.json(
-      { success: false, error: 'Geçersiz e-posta veya şifre' },
-      { status: 401 }
-    );
+    // Compare password with bcrypt
+    const isPasswordValid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { success: false, error: 'Geçersiz e-posta veya şifre' },
+        { status: 401 }
+      );
+    }
+
+    const token = generateSessionToken();
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 saat
+
+    sessions.set(token, { email, expiresAt });
+
+    const response = NextResponse.json({
+      success: true,
+      email: email,
+      message: 'Başarıyla giriş yaptınız',
+    });
+
+    response.cookies.set('adminToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60,
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
