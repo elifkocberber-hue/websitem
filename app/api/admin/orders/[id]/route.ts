@@ -8,14 +8,15 @@ function isAdminAuthenticated(request: NextRequest): boolean {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isAdminAuthenticated(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const orderId = params.id;
+    const { id } = await params;
+    const orderId = id;
 
     // Siparişi al
     const { data: order, error: orderError } = await supabase
@@ -77,14 +78,15 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isAdminAuthenticated(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const orderId = params.id;
+    const { id } = await params;
+    const orderId = id;
     const { status } = await request.json();
 
     const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
