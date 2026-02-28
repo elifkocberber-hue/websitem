@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/context/CeramicCartContext';
 import { useState, useEffect } from 'react';
 
@@ -25,8 +26,15 @@ export const Header: React.FC = () => {
     >
       <nav className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-[72px]">
         {/* Logo */}
-        <Link href="/" className="heading-serif text-xl tracking-tight text-charcoal">
-          El&apos;s Dream Factory
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/Logo.jpg"
+            alt="El's Dream Factory"
+            width={120}
+            height={48}
+            className="h-12 w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}
