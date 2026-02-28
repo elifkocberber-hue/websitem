@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
-export default function PaymentFailedPage() {
+function PaymentFailedContent() {
   const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = useState(false);
   const errorReason = searchParams.get('reason') || 'Bilinmeyen Hata';
@@ -228,5 +228,13 @@ export default function PaymentFailedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentFailedPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentFailedContent />
+    </Suspense>
   );
 }
