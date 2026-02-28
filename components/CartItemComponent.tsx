@@ -13,7 +13,7 @@ export const CartItemComponent: React.FC<CartItemComponentProps> = ({ item }) =>
 
   return (
     <div className="flex gap-4 py-4 border-b">
-      <div className="relative w-20 h-20 flex-shrink-0">
+      <div className="relative w-20 h-20 shrink-0">
         <Image
           src={item.image}
           alt={item.name}
@@ -21,7 +21,7 @@ export const CartItemComponent: React.FC<CartItemComponentProps> = ({ item }) =>
           className="object-cover rounded"
         />
       </div>
-      <div className="flex-grow">
+      <div className="grow">
         <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
         <p className="text-gray-600 mb-2">₺{item.price}</p>
         <div className="flex gap-2 items-center">

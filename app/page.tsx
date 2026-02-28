@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="py-12">
       {/* Hero Section */}
-      <section className="mb-12 bg-gradient-to-r from-amber-600 to-amber-800 text-white rounded-lg p-8 md:p-12">
+      <section className="mb-12 bg-linear-to-r from-amber-600 to-amber-800 text-white rounded-lg p-8 md:p-12">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">🏺 Geleneksel Seramik Sanatı</h1>
         <p className="text-lg md:text-xl mb-6">
           El yapımı seramik ürünlerin en güzel koleksiyonu. Her parça benzersiz ve özel bakımla yapılmıştır.

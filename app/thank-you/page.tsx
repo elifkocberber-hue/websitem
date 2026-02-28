@@ -17,7 +17,7 @@ export default function ThankYouPage() {
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-emerald-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Success Animation */}
         <div className="text-center mb-12">
@@ -37,7 +37,7 @@ export default function ThankYouPage() {
 
         {/* Order Details Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border-t-4 border-emerald-600">
-          <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-8 py-6">
+          <div className="bg-linear-to-r from-emerald-600 to-emerald-500 px-8 py-6">
             <h2 className="text-2xl font-bold text-white">Sipariş Bilgileriniz</h2>
           </div>
           
@@ -145,27 +145,10 @@ export default function ThankYouPage() {
         </div>
 
         {/* Reassurance Banner */}
-        <div className="bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 rounded-lg p-6 text-center">
+        <div className="bg-linear-to-r from-emerald-50 to-blue-50 border border-emerald-200 rounded-lg p-6 text-center">
           <p className="text-gray-700">
             <span className="font-semibold">Ödemeniz güvenlidir.</span> Tüm işlemleriniz SSL şifreleme ile korunmaktadır.
           </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-          </div>
-        </div>
-
-        {/* Additional Info */}
-        <div className="text-center text-gray-600">
-          <p className="mb-2">🐱 El's Dream Factory</p>
-          <p className="mb-4">Seramik ürünlerde kalite ve sanat bir arada</p>
-          <div className="flex justify-center gap-6">
-            <Link href="/" className="hover:text-amber-600 transition-colors">Ana Sayfa</Link>
-            <Link href="/about" className="hover:text-amber-600 transition-colors">Hakkında</Link>
-            <Link href="/ceramics" className="hover:text-amber-600 transition-colors">Ürünler</Link>
-          </div>
         </div>
       </div>
     </div>

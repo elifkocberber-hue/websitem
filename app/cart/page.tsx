@@ -64,7 +64,7 @@ export default function CartPage() {
                   className="p-6 border-b last:border-b-0 flex gap-6 hover:bg-gray-50 transition-colors"
                 >
                   {/* Product Image */}
-                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
+                  <div className="w-24 h-24 bg-gray-100 rounded-lg shrink-0 overflow-hidden">
                     <Image
                       src={item.images[0]}
                       alt={item.name}

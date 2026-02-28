@@ -58,7 +58,7 @@ export default function PaymentFailedPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-red-50 via-white to-orange-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Error Animation */}
         <div className="text-center mb-12">
@@ -76,7 +76,7 @@ export default function PaymentFailedPage() {
 
         {/* Error Details Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border-t-4 border-red-600">
-          <div className="bg-gradient-to-r from-red-600 to-orange-500 px-8 py-6">
+          <div className="bg-linear-to-r from-red-600 to-orange-500 px-8 py-6">
             <h2 className="text-2xl font-bold text-white">Hata Detayları</h2>
           </div>
           
@@ -100,15 +100,15 @@ export default function PaymentFailedPage() {
                 {errorReason === 'card_declined' && (
                   <>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
                       <span className="text-gray-700"><strong>Başka bir ödeme yöntemi deneyin</strong> - Farklı bir kredi kartı kullanın</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
                       <span className="text-gray-700"><strong>Kartınızı kontrol edin</strong> - Numarası, son kullanma tarihi ve CVC'yi doğrulayın</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
                       <span className="text-gray-700"><strong>Bankınızla iletişime geçin</strong> - Kart limitlerini veya güvenlik ayarlarını kontrol etmeleri için</span>
                     </li>
                   </>
@@ -116,15 +116,15 @@ export default function PaymentFailedPage() {
                 {errorReason === 'insufficient_funds' && (
                   <>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
                       <span className="text-gray-700"><strong>Kartınıza para yükleyin</strong> - Daha yüksek bakiyeli bir hesaptan transfer yapmayı deneyin</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
                       <span className="text-gray-700"><strong>Başka bir kart kullanın</strong> - Daha yüksek limite sahip farklı bir kartık deneyin</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
                       <span className="text-gray-700"><strong>Daha sonra deneyin</strong> - Hesap limitlerinin yenilenip yenilenmediğini kontrol edin</span>
                     </li>
                   </>
@@ -132,15 +132,15 @@ export default function PaymentFailedPage() {
                 {(errorReason === 'network_error' || errorReason === 'timeout') && (
                   <>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
                       <span className="text-gray-700"><strong>İnternet bağlantınızı kontrol edin</strong> - Stabil bir bağlantıda olduğunuzdan emin olun</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
                       <span className="text-gray-700"><strong>Sayfayı yenileyin ve tekrar deneyin</strong> - Ağ hatasının geçit olması için bekleyin</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
                       <span className="text-gray-700"><strong>Farklı bir zamanı deneyin</strong> - Sunucu yükü az olduğu bir saatte tekrar deneyin</span>
                     </li>
                   </>
@@ -148,15 +148,15 @@ export default function PaymentFailedPage() {
                 {!['card_declined', 'insufficient_funds', 'network_error', 'timeout'].includes(errorReason) && (
                   <>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">1</span>
                       <span className="text-gray-700"><strong>Tüm bilgileri kontrol edin</strong> - Formda girdiğiniz tüm verilerin doğru olduğundan emin olun</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">2</span>
                       <span className="text-gray-700"><strong>Tekrar ödeme deneyin</strong> - Sepetiniz kaydedilmiştir, ödeme işlemine tekrar başlayın</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
+                      <span className="shrink-0 w-6 h-6 flex items-center justify-center bg-orange-200 text-orange-800 rounded-full text-sm font-bold">3</span>
                       <span className="text-gray-700"><strong>Müşteri destek bize ulaşın</strong> - Sorun devam ederse, destek ekibimiz size yardımcı olabilir</span>
                     </li>
                   </>
@@ -221,7 +221,7 @@ export default function PaymentFailedPage() {
         </div>
 
         {/* Security Banner */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 text-center">
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 text-center">
           <p className="text-gray-700">
             <span className="font-semibold">Verileriniz güvenlidir.</span> Tüm ödeme işlemleri 256-bit SSL şifreleme ile korunmaktadır. Hiçbir ücret alınmıştır.
           </p>

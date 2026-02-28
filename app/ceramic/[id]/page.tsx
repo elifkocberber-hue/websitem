@@ -113,7 +113,7 @@ export default function CeramicDetailPage() {
               <button
                 key={idx}
                 onClick={() => setCurrentImageIndex(idx)}
-                className={`relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-3 transition-all hover:border-amber-400 ${
+                className={`relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border-3 transition-all hover:border-amber-400 ${
                   idx === currentImageIndex ? 'border-amber-600 scale-105' : 'border-gray-300'
                 }`}
               >

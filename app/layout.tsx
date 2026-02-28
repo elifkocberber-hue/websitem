@@ -35,7 +35,7 @@ export default function RootLayout({
           <CartProvider>
             <div className="flex flex-col min-h-screen">
               <Header />
-              <main className="flex-grow max-w-7xl mx-auto w-full px-4">
+              <main className="grow max-w-7xl mx-auto w-full px-4">
                 {children}
               </main>
               <Footer />
