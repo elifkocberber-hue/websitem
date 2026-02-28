@@ -25,19 +25,14 @@ export const Header: React.FC = () => {
       }`}
     >
       <nav className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-[72px] overflow-visible">
-        {/* Logo with half-circle background */}
+        {/* Logo - circular */}
         <Link href="/" className="relative flex items-center justify-center z-50 -mb-[72px]" style={{ marginTop: '36px' }}>
-          {/* Half-circle background */}
-          <span
-            className="absolute left-1/2 -translate-x-1/2 bg-[#F7F3EE] rounded-b-full pointer-events-none"
-            style={{ width: '180px', height: '90px', top: '50%' }}
-          />
           <Image
             src="/images/Logo.jpg"
             alt="El's Dream Factory"
-            width={360}
+            width={144}
             height={144}
-            className="relative h-36 w-auto object-contain drop-shadow-sm"
+            className="relative h-36 w-36 rounded-full object-cover drop-shadow-md"
             priority
           />
         </Link>
