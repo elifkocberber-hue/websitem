@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wider text-stone-300 mb-4">Bilgi</h4>
             <ul className="space-y-2 text-stone-400 text-sm">
-              <li><a href="#" className="hover:text-amber-400 transition-colors">Gizlilik Politikası</a></li>
+              <li><a href="/privacy" className="hover:text-amber-400 transition-colors">Gizlilik Politikası</a></li>
               <li><a href="#" className="hover:text-amber-400 transition-colors">Kullanım Şartları</a></li>
               <li><a href="#" className="hover:text-amber-400 transition-colors">İade Politikası</a></li>
             </ul>
