@@ -11,8 +11,8 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-white shadow">
       <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-amber-600">
-          🐱 El's Dream Factory
+        <Link href="/" className="text-2xl font-bold text-amber-600 tracking-tight">
+          El&apos;s Dream Factory
         </Link>
 
         {/* Desktop Menu */}
@@ -21,10 +21,10 @@ export const Header: React.FC = () => {
             Ana Sayfa
           </Link>
           <Link href="/ceramics" className="text-gray-600 hover:text-amber-600 font-medium">
-            🏺 Koleksiyon
+            Koleksiyon
           </Link>
           <Link href="/about" className="text-gray-600 hover:text-amber-600 font-medium">
-            Hakkında
+            Hakkımızda
           </Link>
           <Link
             href="/cart"
@@ -58,10 +58,10 @@ export const Header: React.FC = () => {
               Ana Sayfa
             </Link>
             <Link href="/ceramics" className="block text-gray-600 hover:text-amber-600 font-medium py-2">
-              🏺 Koleksiyon
+              Koleksiyon
             </Link>
             <Link href="/about" className="block text-gray-600 hover:text-amber-600 font-medium py-2">
-              Hakkında
+              Hakkımızda
             </Link>
             <Link
               href="/cart"

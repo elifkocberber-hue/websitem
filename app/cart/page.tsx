@@ -26,7 +26,7 @@ export default function CartPage() {
             <span>Sepet</span>
           </nav>
 
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">🛒 Alışveriş Sepeti</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Alışveriş Sepeti</h1>
 
           <div className="text-center py-12">
             <p className="text-xl text-gray-600 mb-6">Sepetiniz boş</p>
@@ -52,7 +52,7 @@ export default function CartPage() {
           <span>Sepet</span>
         </nav>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">🛒 Alışveriş Sepeti</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Alışveriş Sepeti</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -84,11 +84,11 @@ export default function CartPage() {
                     </Link>
                     <p className="text-sm text-gray-600 mb-2">{item.category}</p>
                     <p className="text-sm font-medium text-gray-700 mb-3">
-                      {item.clayType === 'stoneware' && '🏺 Stoneware'}
-                      {item.clayType === 'porcelain' && '✨ Porselen'}
-                      {item.clayType === 'earthenware' && '🪨 Toprak Çanak'}
-                      {item.clayType === 'bone-china' && '💎 Kemik Porseleni'}
-                      {item.clayType === 'terracotta' && '🌍 Terracotta'}
+                      {item.clayType === 'stoneware' && 'Stoneware'}
+                      {item.clayType === 'porcelain' && 'Porselen'}
+                      {item.clayType === 'earthenware' && 'Toprak Çanak'}
+                      {item.clayType === 'bone-china' && 'Kemik Porseleni'}
+                      {item.clayType === 'terracotta' && 'Terracotta'}
                     </p>
                     <p className="text-sm text-gray-700">
                       Birim Fiyat: <span className="font-bold text-amber-600">₺{item.price}</span>
@@ -172,7 +172,7 @@ export default function CartPage() {
                 href="/payment"
                 className="w-full block text-center bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition-colors mb-3"
               >
-                🔐 Ödemeye Geç
+                Ödemeye Geç
               </Link>
 
               <button

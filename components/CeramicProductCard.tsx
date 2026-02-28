@@ -32,11 +32,11 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({ product 
   };
 
   const clayTypeLabels: Record<string, string> = {
-    stoneware: '🏺 Stoneware',
-    porcelain: '✨ Porselen',
-    earthenware: '🪨 Toprak Çanak',
-    'bone-china': '💎 Kemik Porseleni',
-    terracotta: '🌍 Terracotta',
+    stoneware: 'Stoneware',
+    porcelain: 'Porselen',
+    earthenware: 'Toprak Çanak',
+    'bone-china': 'Kemik Porseleni',
+    terracotta: 'Terracotta',
   };
 
   return (
@@ -84,7 +84,7 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({ product 
         {/* Handmade Badge */}
         {product.handmade && (
           <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-            ✋ El Yapımı
+            El Yapımı
           </div>
         )}
       </div>
@@ -115,12 +115,12 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({ product 
         <div className="flex flex-wrap gap-1 mb-3">
           {product.dishwasherSafe && (
             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-              🍽️ Bulaşık Makinesinde
+              Bulaşık Makinesinde
             </span>
           )}
           {product.microwave && (
             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-              🔥 Mikrodalga
+              Mikrodalga
             </span>
           )}
         </div>
@@ -154,7 +154,7 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({ product 
                 : 'bg-amber-600 hover:bg-amber-700'
             }`}
           >
-            {addedToCart ? '✓ Eklendi' : '💳 Sepete Ekle'}
+            {addedToCart ? '✓ Eklendi' : 'Sepete Ekle'}
           </button>
         </div>
         

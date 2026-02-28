@@ -35,11 +35,11 @@ export default function CeramicDetailPage() {
     .slice(0, 4);
 
   const clayTypeLabels: Record<string, string> = {
-    stoneware: '🏺 Stoneware',
-    porcelain: '✨ Porselen',
-    earthenware: '🪨 Toprak Çanak',
-    'bone-china': '💎 Kemik Porseleni',
-    terracotta: '🌍 Terracotta',
+    stoneware: 'Stoneware',
+    porcelain: 'Porselen',
+    earthenware: 'Toprak Çanak',
+    'bone-china': 'Kemik Porseleni',
+    terracotta: 'Terracotta',
   };
 
   const handleAddToCart = () => {
@@ -95,12 +95,12 @@ export default function CeramicDetailPage() {
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
                   <div className="bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    🔍 Yakınlaştır
+                    Yakınlaştır
                   </div>
                 </div>
                 {product.handmade && (
                   <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    ✋ El Yapımı
+                    El Yapımı
                   </div>
                 )}
               </button>
@@ -195,19 +195,19 @@ export default function CeramicDetailPage() {
               {product.dishwasherSafe && (
                 <li className="flex items-start">
                   <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">🍽️ Bulaşık makinesinde güvenli</span>
+                  <span className="text-gray-700">Bulaşık makinesinde güvenli</span>
                 </li>
               )}
               {product.microwave && (
                 <li className="flex items-start">
                   <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">🔥 Mikrodalgada güvenli</span>
+                  <span className="text-gray-700">Mikrodalgada güvenli</span>
                 </li>
               )}
               {product.handmade && (
                 <li className="flex items-start">
                   <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">✋ El yapımı, benzersiz tasarım</span>
+                  <span className="text-gray-700">El yapımı, benzersiz tasarım</span>
                 </li>
               )}
             </ul>
@@ -257,7 +257,7 @@ export default function CeramicDetailPage() {
                   : 'bg-amber-600 hover:bg-amber-700'
               }`}
             >
-              {addedToCart ? '✓ Sepete Eklendi' : '💳 Sepete Ekle'}
+              {addedToCart ? '✓ Sepete Eklendi' : 'Sepete Ekle'}
             </button>
           </div>
 

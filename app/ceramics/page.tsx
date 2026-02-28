@@ -15,11 +15,11 @@ export default function CeramicsPage() {
   const clayTypes = getClayTypes();
 
   const clayTypeLabels: Record<string, string> = {
-    stoneware: '🏺 Stoneware',
-    porcelain: '✨ Porselen',
-    earthenware: '🪨 Toprak Çanak',
-    'bone-china': '💎 Kemik Porseleni',
-    terracotta: '🌍 Terracotta',
+    stoneware: 'Stoneware',
+    porcelain: 'Porselen',
+    earthenware: 'Toprak Çanak',
+    'bone-china': 'Kemik Porseleni',
+    terracotta: 'Terracotta',
   };
 
   let filteredProducts = ceramicProducts;
@@ -38,18 +38,11 @@ export default function CeramicsPage() {
     <div className="py-12">
       {/* Header */}
       <section className="mb-10">
-        <h1 className="text-4xl font-bold text-gray-900 mb-3">🏺 Seramik Ürünleri</h1>
-        <p className="text-lg text-gray-600 mb-6">
+        <p className="text-amber-600 font-medium text-sm uppercase tracking-wider mb-2">Koleksiyon</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-3">Seramik Ürünleri</h1>
+        <p className="text-lg text-gray-500 mb-6">
           Geleneksel seramik sanatının en güzel örnekleri. Her ürün benzersiz ve kaliteli malzemelerle yapılmıştır.
         </p>
-        <div className="flex gap-2">
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Elektronik Ürünlere Dön
-          </Link>
-        </div>
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -67,7 +60,7 @@ export default function CeramicsPage() {
                   onChange={(e) => setShowHandmadeOnly(e.target.checked)}
                   className="w-4 h-4 rounded"
                 />
-                <span className="ml-2 text-gray-700 font-medium">✋ Sadece El Yapımı</span>
+                <span className="ml-2 text-gray-700 font-medium">Sadece El Yapımı</span>
               </label>
             </div>
 
@@ -79,7 +72,7 @@ export default function CeramicsPage() {
                   onClick={() => setSelectedCategory(null)}
                   className={`block w-full text-left px-3 py-2 rounded transition-colors ${
                     selectedCategory === null
-                      ? 'bg-blue-600 text-white font-medium'
+                      ? 'bg-amber-600 text-white font-medium'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -91,7 +84,7 @@ export default function CeramicsPage() {
                     onClick={() => setSelectedCategory(category)}
                     className={`block w-full text-left px-3 py-2 rounded transition-colors ${
                       selectedCategory === category
-                        ? 'bg-blue-600 text-white font-medium'
+                        ? 'bg-amber-600 text-white font-medium'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -109,7 +102,7 @@ export default function CeramicsPage() {
                   onClick={() => setSelectedClayType(null)}
                   className={`block w-full text-left px-3 py-2 rounded transition-colors ${
                     selectedClayType === null
-                      ? 'bg-blue-600 text-white font-medium'
+                      ? 'bg-amber-600 text-white font-medium'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -121,7 +114,7 @@ export default function CeramicsPage() {
                     onClick={() => setSelectedClayType(clayType)}
                     className={`block w-full text-left px-3 py-2 rounded transition-colors text-sm ${
                       selectedClayType === clayType
-                        ? 'bg-blue-600 text-white font-medium'
+                        ? 'bg-amber-600 text-white font-medium'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -139,7 +132,7 @@ export default function CeramicsPage() {
                   setSelectedClayType(null);
                   setShowHandmadeOnly(false);
                 }}
-                className="w-full mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition-colors"
+                className="w-full mt-6 bg-stone-100 hover:bg-stone-200 text-stone-800 font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Filtreleri Temizle
               </button>
@@ -170,7 +163,7 @@ export default function CeramicsPage() {
                   setSelectedClayType(null);
                   setShowHandmadeOnly(false);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium transition-colors"
+                className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
               >
                 Filtreleri Sıfırla
               </button>
