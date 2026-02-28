@@ -15,9 +15,9 @@ Disallow: /checkout/
 Crawl-delay: 1
 
 # Sitemaps
-Sitemap: https://websitemm.vercel.app/sitemap.xml
-Sitemap: https://websitemm.vercel.app/sitemap-products.xml
-Sitemap: https://websitemm.vercel.app/sitemap-ceramics.xml
+Sitemap: https://elsdreamfactory.com/sitemap.xml
+Sitemap: https://elsdreamfactory.com/sitemap-products.xml
+Sitemap: https://elsdreamfactory.com/sitemap-ceramics.xml
 
 # Specific user agents
 User-agent: Googlebot

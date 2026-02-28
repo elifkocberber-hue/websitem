@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 
 export async function GET() {
-  const baseUrl = 'https://websitemm.vercel.app';
+  const baseUrl = 'https://elsdreamfactory.com';
 
   // Ana sayfalar
   const pages = [

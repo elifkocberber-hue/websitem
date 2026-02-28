@@ -30,13 +30,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    url: "https://websitemm.vercel.app",
+    url: "https://elsdreamfactory.com",
     title: "Ter-a Seramik | Handmade Ceramic Products",
     description: "Discover beautiful handmade ceramic products and home décor items.",
     siteName: "Ter-a Seramik",
     images: [
       {
-        url: "https://websitemm.vercel.app/og-image.png",
+        url: "https://elsdreamfactory.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "Ter-a Seramik - Handmade Ceramics",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ter-a Seramik | Handmade Ceramics",
     description: "Beautiful handmade ceramic products and home décor.",
-    images: ["https://websitemm.vercel.app/twitter-image.png"],
+    images: ["https://elsdreamfactory.com/twitter-image.png"],
   },
 
   // Additional Metadata
@@ -66,15 +66,15 @@ export const metadata: Metadata = {
   },
 
   // Canonical (for Next.js)
-  metadataBase: new URL("https://websitemm.vercel.app"),
+  metadataBase: new URL("https://elsdreamfactory.com"),
   alternates: {
-    canonical: "https://websitemm.vercel.app",
+    canonical: "https://elsdreamfactory.com",
   },
 
   authors: [
     {
       name: "Ter-a Seramik",
-      url: "https://websitemm.vercel.app",
+      url: "https://elsdreamfactory.com",
     },
   ],
 
@@ -98,8 +98,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Ter-a Seramik",
-              url: "https://websitemm.vercel.app",
-              logo: "https://websitemm.vercel.app/logo.png",
+              url: "https://elsdreamfactory.com",
+              logo: "https://elsdreamfactory.com/logo.png",
               description: "Handmade ceramic products and home décor",
               sameAs: [
                 "https://www.instagram.com/teraseramik",
@@ -123,12 +123,12 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "Ter-a Seramik",
-              url: "https://websitemm.vercel.app",
+              url: "https://elsdreamfactory.com",
               potentialAction: {
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
-                  urlTemplate: "https://websitemm.vercel.app/search?q={search_term_string}",
+                  urlTemplate: "https://elsdreamfactory.com/search?q={search_term_string}",
                 },
                 query_input: "required name=search_term_string",
               },

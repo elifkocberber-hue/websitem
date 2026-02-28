@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://websitemm.vercel.app/ceramics-og.png',
+        url: 'https://elsdreamfactory.com/ceramics-og.png',
         width: 1200,
         height: 630,
         alt: 'Ceramic Products',
