@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   keywords: 'el yapımı seramik atölye, seramik sanatı, geleneksel seramik, handmade seramik',
   openGraph: {
     title: 'Hakkımızda | El\'s Dream Factory',
-    description: 'El yapımı seramik sanatı — üç kuşaklık gelenekle modern tasarımın buluşması.',,
+    description: 'El yapımı seramik sanatı — üç kuşaklık gelenekle modern tasarımın buluşması.',
     type: 'website',
   },
 };
