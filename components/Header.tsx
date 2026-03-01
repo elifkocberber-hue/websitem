@@ -72,6 +72,12 @@ export const Header: React.FC = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-10">
           <Link
+            href="/"
+            className="link-line text-[13px] tracking-[0.12em] uppercase text-earth hover:text-charcoal transition-colors"
+          >
+            Anasayfa
+          </Link>
+          <Link
             href="/ceramics"
             className="link-line text-[13px] tracking-[0.12em] uppercase text-earth hover:text-charcoal transition-colors"
           >
