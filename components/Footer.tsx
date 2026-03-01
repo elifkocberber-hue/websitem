@@ -25,6 +25,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-[11px] tracking-[0.2em] uppercase text-clay mb-5">Bilgi</h4>
             <ul className="space-y-3">
               <li><Link href="/privacy" className="text-sm text-bone/60 hover:text-bone transition-colors">Gizlilik Politikası</Link></li>
+              <li><Link href="/cookie-policy" className="text-sm text-bone/60 hover:text-bone transition-colors">Çerez Politikası</Link></li>
               <li><a href="#" className="text-sm text-bone/60 hover:text-bone transition-colors">Kullanım Şartları</a></li>
               <li><a href="#" className="text-sm text-bone/60 hover:text-bone transition-colors">İade Politikası</a></li>
             </ul>
