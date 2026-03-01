@@ -12,7 +12,7 @@ export default function Home() {
       {/* ═══════ HERO ═══════ */}
       <section className="relative h-[85vh] min-h-[550px] overflow-hidden">
         <Image
-          src="/images/arkaplan.JPG"
+          src="/images/arkaplan.jpg"
           alt="El yapımı seramik ürünler - Dekoratif seramik koleksiyonu"
           fill
           className="object-cover"
@@ -118,7 +118,7 @@ export default function Home() {
       {/* ═══════ ABOUT SECTION (dark) ═══════ */}
       <section className="relative py-24 md:py-32 overflow-hidden">
         <Image
-          src="/images/arkaplan.JPG"
+          src="/images/arkaplan.jpg"
           alt="Arka plan"
           fill
           className="object-cover"
