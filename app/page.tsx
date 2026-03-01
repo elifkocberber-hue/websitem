@@ -29,7 +29,7 @@ export default function Home() {
               Topraktan<br />Sanata
             </h1>
             <p className="text-bone/70 max-w-md text-lg mb-10 leading-relaxed">
-              Kütahya&apos;nın üç kuşaklık seramik geleneğini modern tasarımla buluşturuyoruz. Sevimli kedi figürlerinden el yapımı kupalara, özel hediye seçenekleri keşfedin.
+              Üç kuşaklık seramik geleneğini modern tasarımla buluşturuyoruz. Sevimli kedi figürlerinden el yapımı kupalara, özel hediye seçenekleri keşfedin.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -59,7 +59,7 @@ export default function Home() {
         <div className="marquee-track">
           {[0, 1].map((i) => (
             <span key={i} className="flex items-center gap-8 px-4">
-              {['El Yapımı', 'Seramik', 'Kütahya', 'Sanat', 'Tasarım', 'Gelenek'].map((word) => (
+              {['El Yapımı', 'Seramik', 'Sanat', 'Tasarım', 'Gelenek', 'Hediye'].map((word) => (
                 <span key={`${i}-${word}`} className="flex items-center gap-8">
                   <span className="heading-serif text-bone/80 text-sm tracking-[0.15em] uppercase">{word}</span>
                   <span className="text-accent">·</span>
@@ -124,7 +124,7 @@ export default function Home() {
               Üç Kuşağın Mirası
             </h2>
             <p className="text-bone/60 leading-relaxed mb-4">
-              1994&apos;ten bu yana Kütahya&apos;nın seramik geleneğini yaşatıyoruz.
+              1994&apos;ten bu yana seramik geleneğini yaşatıyoruz.
               Her ürünümüz, ustalarımızın ellerinde şekillenen benzersiz bir sanat eseri.
             </p>
             <p className="text-bone/60 leading-relaxed mb-8">

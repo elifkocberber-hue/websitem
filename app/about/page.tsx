@@ -29,10 +29,10 @@ export default function AboutPage() {
           <ScrollReveal direction="left">
             <p className="text-xs tracking-[0.2em] uppercase text-accent mb-4">Kuruluş · 1994</p>
             <h2 className="heading-display text-3xl md:text-4xl text-charcoal mb-6">
-              Kütahya&apos;dan<br />Dünyaya
+              Topraktan<br />Dünyaya
             </h2>
             <p className="text-earth leading-relaxed mb-4">
-              Üç kuşaklık seramik geleneğini taşıyan atölyemiz, 1994 yılında Kütahya&apos;da kuruldu.
+              Üç kuşaklık seramik geleneğini taşıyan atölyemiz, 1994 yılında kuruldu.
               Babamızın başlattığı bu yolculuk, bugün aynı tutku ve titizlikle devam etmektedir.
             </p>
             <p className="text-earth leading-relaxed mb-4">
@@ -118,7 +118,7 @@ export default function AboutPage() {
           <h2 className="heading-display text-3xl md:text-4xl text-charcoal mb-6">Bize Ulaşın</h2>
           <div className="flex flex-col md:flex-row justify-center gap-8 text-earth mb-10">
             <p>info@elsdreamfactory.com</p>
-            <p>Kütahya, Türkiye</p>
+            <p>Türkiye</p>
           </div>
           <Link
             href="/ceramics"

@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-[11px] tracking-[0.2em] uppercase text-clay mb-5">İletişim</h4>
             <ul className="space-y-3">
               <li className="text-sm text-bone/60">info@elsdreamfactory.com</li>
-              <li className="text-sm text-bone/60">Kütahya, Türkiye</li>
+              <li className="text-sm text-bone/60">Türkiye</li>
             </ul>
           </div>
           <div>
@@ -49,7 +49,7 @@ export const Footer: React.FC = () => {
         {/* Bottom */}
         <div className="border-t border-bone/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-bone/30">&copy; 2026 El&apos;s Dream Factory</p>
-          <p className="text-xs text-bone/30">Kütahya&apos;dan sevgiyle</p>
+          <p className="text-xs text-bone/30">Sevgiyle üretildi</p>
         </div>
       </div>
     </footer>

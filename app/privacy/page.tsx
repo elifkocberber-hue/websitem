@@ -39,7 +39,6 @@ export default function PrivacyPage() {
           <div className="bg-stone-50 rounded-xl p-6">
             <p className="text-gray-600 leading-relaxed">
               <strong>Unvan:</strong> El&apos;s Dream Factory<br />
-              <strong>Adres:</strong> Kütahya, Türkiye<br />
               <strong>E-posta:</strong> info@elsdreamfactory.com<br />
               <strong>Web:</strong> elsdreamfactory.com
             </p>
@@ -326,7 +325,7 @@ export default function PrivacyPage() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-amber-600 font-bold mt-0.5">&#8226;</span>
-                <span><strong>Posta:</strong> Kütahya, Türkiye adresine noter aracılığıyla veya iadeli taahhütlü mektup ile başvuru</span>
+                <span><strong>Posta:</strong> İlgili adresimize noter aracılığıyla veya iadeli taahhütlü mektup ile başvuru</span>
               </li>
             </ul>
             <p className="text-gray-500 text-sm mt-4">

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'El Yapımı Seramik Koleksiyonu | Kupa, Vazo, Kedi Figür & Hediye',
-  description: 'El yapımı seramik ürünler: sevimli kedi figürleri, dekoratif vazolar, seramik kupalar ve özel hediye seçenekleri. Kütahya\'dan el emeğiyle üretilen benzersiz seramik objeler.',
+  description: 'El yapımı seramik ürünler: sevimli kedi figürleri, dekoratif vazolar, seramik kupalar ve özel hediye seçenekleri. El emeğiyle üretilen benzersiz seramik objeler.',
   keywords: 'el yapımı seramik, seramik kedi figür, seramik kupa, dekoratif vazo, seramik hediye, handmade seramik, sevimli seramik objeler',
   openGraph: {
     title: 'El Yapımı Seramik Koleksiyonu | El\'s Dream Factory',
