@@ -68,6 +68,12 @@ export const metadata: Metadata = {
         height: 630,
         alt: "El's Dream Factory - El Yapımı Seramik Ürünler ve Hediyeler",
       },
+      {
+        url: "https://elsdreamfactory.com/instagram-image.png",
+        width: 1080,
+        height: 1080,
+        alt: "El's Dream Factory - El Yapımı Seramik",
+      },
     ],
   },
 
