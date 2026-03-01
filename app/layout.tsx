@@ -4,6 +4,7 @@ import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CeramicCartContext";
 import { AdminProvider } from "@/context/AdminContext";
+import { UserProvider } from "@/context/UserContext";
 import { Header, Footer } from "@/components";
 import { CustomCursor } from "@/components/CustomCursor";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -232,6 +233,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
         <AdminProvider>
+          <UserProvider>
           <CartProvider>
             <CustomCursor />
             <CookieConsent />
@@ -243,6 +245,7 @@ export default function RootLayout({
               <Footer />
             </div>
           </CartProvider>
+          </UserProvider>
         </AdminProvider>
       </body>
     </html>
