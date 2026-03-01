@@ -6,6 +6,7 @@ import { CartProvider } from "@/context/CeramicCartContext";
 import { AdminProvider } from "@/context/AdminContext";
 import { Header, Footer } from "@/components";
 import { CustomCursor } from "@/components/CustomCursor";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -227,6 +228,7 @@ export default function RootLayout({
         <AdminProvider>
           <CartProvider>
             <CustomCursor />
+            <CookieConsent />
             <div className="flex flex-col min-h-screen">
               <Header />
               <main className="grow">
