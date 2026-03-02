@@ -81,7 +81,7 @@ export const SearchBar: React.FC = () => {
     }
   }, [showInput]);
 
-  const handleSelect = (id: number) => {
+  const handleSelect = (id: number | string) => {
     setIsOpen(false);
     setShowInput(false);
     setQuery('');

@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 export default function CeramicDetailPage() {
   const params = useParams();
   const productId = params.id as string;
-  const localProduct = getCeramicProductById(parseInt(productId));
+  const localProduct = getCeramicProductById(productId);
   const [product, setProduct] = useState<CeramicProduct | null | undefined>(localProduct);
   const [allProducts, setAllProducts] = useState<CeramicProduct[]>(ceramicProducts);
   const { addToCart } = useCart();

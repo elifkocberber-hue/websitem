@@ -23,8 +23,8 @@ export async function fetchProducts(): Promise<CeramicProduct[]> {
   return ceramicProducts;
 }
 
-export const getCeramicProductById = (id: number): CeramicProduct | undefined => {
-  return ceramicProducts.find(product => product.id === id);
+export const getCeramicProductById = (id: number | string): CeramicProduct | undefined => {
+  return ceramicProducts.find(product => String(product.id) === String(id));
 };
 
 export const getCeramicProductsByCategory = (category: string): CeramicProduct[] => {

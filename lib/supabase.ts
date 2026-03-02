@@ -32,7 +32,7 @@ export interface Order {
 export interface OrderItem {
   id: string;
   order_id: string;
-  product_id: number;
+  product_id: number | string;
   product_name: string;
   quantity: number;
   price: number;
@@ -94,7 +94,7 @@ export const createOrder = async (
 export const createOrderItems = async (
   orderId: string,
   items: Array<{
-    product_id: number;
+    product_id: number | string;
     product_name: string;
     quantity: number;
     price: number;
