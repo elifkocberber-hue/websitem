@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password } = await request.json();
+    const { email, password, rememberMe } = await request.json();
 
     // Validate input
     if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
     }
 
     const token = generateSessionToken();
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 saat
+    const sessionDuration = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 7 gün veya 24 saat
+    const expiresAt = Date.now() + sessionDuration;
 
     sessions.set(token, { email, expiresAt });
 
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60,
+      maxAge: rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60,
     });
 
     return response;

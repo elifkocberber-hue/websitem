@@ -9,6 +9,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const { login } = useAdmin();
 
@@ -18,7 +19,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await login(email, password, rememberMe);
       if (success) {
         router.push('/admin/dashboard');
       } else {
@@ -71,6 +72,20 @@ export default function AdminLoginPage() {
                 placeholder="••••••••"
                 required
               />
+            </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500 cursor-pointer accent-amber-600"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-gray-600 cursor-pointer select-none">
+                Beni Hatırla
+              </label>
             </div>
 
             {/* Error Message */}
