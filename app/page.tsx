@@ -31,7 +31,7 @@ export default function Home() {
               Fırından Yeni Çıkan<br />Mutluluklar
             </h1>
             <p className="text-charcoal/80 max-w-md text-lg mb-10 leading-relaxed">
-              Bu atölyede her şey <span className="hero-word hero-word--camur text-[#3B100C] font-semibold">çamur</span> ile başlar, <span className="hero-word hero-word--renk text-[#3B100C] font-semibold">renk</span> ile canlanır, <span className="hero-word hero-word--pati text-[#3B100C] font-semibold">pati izi</span> ile mühürlenir.
+              Bu atölyede her şey <span className="hero-word hero-word--camur text-[#5C0A1A] font-semibold">çamur</span> ile başlar, <span className="hero-word hero-word--renk text-[#5C0A1A] font-semibold">renk</span> ile canlanır, <span className="hero-word hero-word--pati text-[#5C0A1A] font-semibold">pati izi</span> ile mühürlenir.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
