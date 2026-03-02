@@ -5,15 +5,15 @@
    ============================================= */
 
 :root {
-  --background: #F7F3EE;
-  --foreground: #1C1917;
-  --accent: #C2410C;
-  --accent-hover: #9A3412;
-  --earth: #78716C;
-  --clay: #A8A29E;
-  --bone: #F7F3EE;
-  --charcoal: #292524;
-  --warm-gray: #E7E0D8;
+  --background: #FAF5EE;
+  --foreground: #3B2420;
+  --accent: #DD6B56;
+  --accent-hover: #C45540;
+  --earth: #9B7468;
+  --clay: #D57C68;
+  --bone: #FAF5EE;
+  --charcoal: #3B2420;
+  --warm-gray: #F0E4D8;
 }
 
 @theme inline {

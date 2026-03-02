@@ -77,8 +77,8 @@ export const Header: React.FC = () => {
       <header
         className={`sticky top-0 z-50 transition-all duration-500 overflow-visible ${
           scrolled
-            ? 'bg-[#F7F3EE]/95 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.06)]'
-            : 'bg-[#F7F3EE]/60 backdrop-blur-sm'
+            ? 'bg-[#FAF5EE]/95 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.06)]'
+            : 'bg-[#FAF5EE]/60 backdrop-blur-sm'
         }`}
       >
         <nav className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-[72px] overflow-visible">
