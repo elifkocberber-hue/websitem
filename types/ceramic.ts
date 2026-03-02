@@ -1,5 +1,5 @@
 export interface CeramicProduct {
-  id: number;
+  id: number | string;
   name: string;
   description: string;
   price: number;
@@ -18,6 +18,7 @@ export interface CeramicProduct {
   glaze?: string;
   dishwasherSafe?: boolean;
   microwave?: boolean;
+  featured?: boolean;
 }
 
 export interface CeramicImage {

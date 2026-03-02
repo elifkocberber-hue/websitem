@@ -66,6 +66,46 @@ CREATE POLICY "Users can view their order items" ON order_items
     )
   );
 
+-- Products table
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  description TEXT DEFAULT '',
+  price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  stock INTEGER DEFAULT 0,
+  clay_type VARCHAR(50) DEFAULT 'stoneware',
+  category VARCHAR(100) DEFAULT '',
+  handmade BOOLEAN DEFAULT true,
+  glaze VARCHAR(100) DEFAULT '',
+  dimensions JSONB DEFAULT '{}',
+  weight INTEGER,
+  dishwasher_safe BOOLEAN DEFAULT false,
+  microwave BOOLEAN DEFAULT false,
+  images TEXT[] DEFAULT '{}',
+  featured BOOLEAN DEFAULT false,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_products_active ON products(active);
+CREATE INDEX IF NOT EXISTS idx_products_featured ON products(featured);
+
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view active products" ON products
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can insert products" ON products
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Anyone can update products" ON products
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY "Anyone can delete products" ON products
+  FOR DELETE USING (true);
+
 -- Visitors table (analytics)
 CREATE TABLE IF NOT EXISTS visitors (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

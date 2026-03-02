@@ -1,18 +1,29 @@
 'use client';
 
 import { ceramicProducts, getCeramicCategories, getClayTypes } from '@/data/ceramicProducts';
+import { CeramicProduct } from '@/types/ceramic';
 import { CeramicProductCard } from '@/components/CeramicProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CeramicsPage() {
+  const [products, setProducts] = useState<CeramicProduct[]>(ceramicProducts);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedClayType, setSelectedClayType] = useState<string | null>(null);
   const [showHandmadeOnly, setShowHandmadeOnly] = useState(false);
 
-  const categories = getCeramicCategories();
-  const clayTypes = getClayTypes();
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setProducts(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const categories = Array.from(new Set(products.map(p => p.category)));
+  const clayTypes = Array.from(new Set(products.map(p => p.clayType))) as CeramicProduct['clayType'][];
 
   const clayTypeLabels: Record<string, string> = {
     stoneware: 'Stoneware',
@@ -22,7 +33,7 @@ export default function CeramicsPage() {
     terracotta: 'Terracotta',
   };
 
-  let filteredProducts = ceramicProducts;
+  let filteredProducts = products;
   if (selectedCategory) filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
   if (selectedClayType) filteredProducts = filteredProducts.filter(p => p.clayType === selectedClayType);
   if (showHandmadeOnly) filteredProducts = filteredProducts.filter(p => p.handmade);

@@ -1,11 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ceramicProducts } from '@/data/ceramicProducts';
+import { fetchProducts } from '@/data/ceramicProducts';
 import { CeramicProductCard } from '@/components/CeramicProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
 
-export default function Home() {
-  const featured = ceramicProducts.slice(0, 4);
+export default async function Home() {
+  const allProducts = await fetchProducts();
+  const featured = allProducts.slice(0, 4);
 
   return (
     <>

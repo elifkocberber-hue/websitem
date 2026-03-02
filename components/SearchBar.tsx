@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { CeramicProduct } from '@/types/ceramic';
 import { ceramicProducts } from '@/data/ceramicProducts';
 import Image from 'next/image';
 
 interface SearchResult {
-  id: number;
+  id: number | string;
   name: string;
   category: string;
   price: number;
@@ -18,9 +19,18 @@ export const SearchBar: React.FC = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showInput, setShowInput] = useState(false);
+  const [products, setProducts] = useState<CeramicProduct[]>(ceramicProducts);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Supabase'den ürünleri çek
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data) && data.length > 0) setProducts(data); })
+      .catch(() => {});
+  }, []);
 
   // Search logic
   useEffect(() => {
@@ -30,7 +40,7 @@ export const SearchBar: React.FC = () => {
     }
 
     const q = query.toLowerCase().trim();
-    const filtered = ceramicProducts
+    const filtered = products
       .filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||

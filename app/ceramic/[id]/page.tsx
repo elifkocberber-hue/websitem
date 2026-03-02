@@ -4,20 +4,44 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getCeramicProductById, ceramicProducts } from '@/data/ceramicProducts';
+import { CeramicProduct } from '@/types/ceramic';
 import { CeramicProductCard } from '@/components/CeramicProductCard';
 import { ImageZoom } from '@/components/ImageZoom';
 import { useCart } from '@/context/CeramicCartContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CeramicDetailPage() {
   const params = useParams();
-  const productId = parseInt(params.id as string);
-  const product = getCeramicProductById(productId);
+  const productId = params.id as string;
+  const localProduct = getCeramicProductById(parseInt(productId));
+  const [product, setProduct] = useState<CeramicProduct | null | undefined>(localProduct);
+  const [allProducts, setAllProducts] = useState<CeramicProduct[]>(ceramicProducts);
   const { addToCart } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [zoomedImageIndex, setZoomedImageIndex] = useState<number | null>(null);
+  const [loadingProduct, setLoadingProduct] = useState(!localProduct);
+
+  useEffect(() => {
+    // Supabase'den güncel veriyi çek
+    Promise.all([
+      fetch(`/api/products?id=${productId}`).then(r => r.json()).catch(() => null),
+      fetch('/api/products').then(r => r.json()).catch(() => []),
+    ]).then(([productData, productsData]) => {
+      if (productData && productData.id) setProduct(productData);
+      if (Array.isArray(productsData) && productsData.length > 0) setAllProducts(productsData);
+      setLoadingProduct(false);
+    });
+  }, [productId]);
+
+  if (loadingProduct) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-20 text-center">
+        <p className="text-earth">Yükleniyor...</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -30,7 +54,7 @@ export default function CeramicDetailPage() {
     );
   }
 
-  const relatedProducts = ceramicProducts
+  const relatedProducts = allProducts
     .filter(p => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 

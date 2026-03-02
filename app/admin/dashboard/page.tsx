@@ -145,7 +145,13 @@ export default function AdminDashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Quick Links */}
-        <div className="mb-8">
+        <div className="mb-8 flex flex-wrap gap-3">
+          <Link
+            href="/admin/products"
+            className="inline-flex items-center gap-2 bg-[#DD6B56] hover:bg-[#C45540] text-white font-medium py-2 px-5 rounded-lg transition"
+          >
+            🛍️ Ürün Yönetimi
+          </Link>
           <Link
             href="/admin/analytics"
             className="inline-flex items-center gap-2 bg-[#5C0A1A] hover:bg-[#DD6B56] text-white font-medium py-2 px-5 rounded-lg transition"
