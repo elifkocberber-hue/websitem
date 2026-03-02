@@ -29,7 +29,7 @@ export default function Home() {
               El Yapımı Seramik Ürünler & Hediyeler
             </p>
             <h1 className="heading-display text-charcoal text-5xl md:text-7xl lg:text-8xl mb-6">
-              Topraktan<br />Sanata
+              Fırından Yeni Çıkan<br />Mutluluklar
             </h1>
             <p className="text-earth max-w-md text-lg mb-10 leading-relaxed">
               Üç kuşaklık seramik geleneğini modern tasarımla buluşturuyoruz. Sevimli kedi figürlerinden el yapımı kupalara, özel hediye seçenekleri keşfedin.
