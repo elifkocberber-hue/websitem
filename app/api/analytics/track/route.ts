@@ -33,6 +33,22 @@ function parseUserAgent(ua: string) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // Süre güncellemesi (sendBeacon ile gelen)
+    if (body.visitorId && body.duration) {
+      const { error } = await supabase
+        .from('visitors')
+        .update({ duration: body.duration })
+        .eq('id', body.visitorId);
+
+      if (error) {
+        console.error('Duration update error:', error);
+        return NextResponse.json({ success: false }, { status: 500 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    // Yeni ziyaret kaydı
     const { page, referrer, screenWidth, screenHeight, language, sessionId } = body;
 
     const userAgent = request.headers.get('user-agent') || '';
@@ -42,7 +58,7 @@ export async function POST(request: NextRequest) {
     const country = request.headers.get('x-vercel-ip-country') || 'Unknown';
     const city = request.headers.get('x-vercel-ip-city') || 'Unknown';
 
-    const { error } = await supabase.from('visitors').insert({
+    const { data, error } = await supabase.from('visitors').insert({
       page,
       referrer: referrer || null,
       user_agent: userAgent,
@@ -55,14 +71,15 @@ export async function POST(request: NextRequest) {
       screen_height: screenHeight || null,
       language: language || null,
       session_id: sessionId || null,
-    });
+      duration: 0,
+    }).select('id').single();
 
     if (error) {
       console.error('Visitor tracking error:', error);
       return NextResponse.json({ success: false }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, visitorId: data?.id });
   } catch {
     return NextResponse.json({ success: false }, { status: 500 });
   }

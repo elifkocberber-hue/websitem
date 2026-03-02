@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS visitors (
   screen_height INTEGER,
   language VARCHAR(20),
   session_id VARCHAR(100),
+  duration INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -93,6 +94,9 @@ ALTER TABLE visitors ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can insert visitor data" ON visitors
   FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Anyone can update visitor duration" ON visitors
+  FOR UPDATE USING (true) WITH CHECK (true);
 
 CREATE POLICY "Admins can view visitor data" ON visitors
   FOR SELECT USING (true);
