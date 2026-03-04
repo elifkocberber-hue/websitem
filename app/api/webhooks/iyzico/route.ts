@@ -15,7 +15,14 @@ function verifyWebhookSignature(
     .update(body)
     .digest('base64');
 
-  return signature === expectedSignature;
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+  } catch {
+    return false;
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -23,18 +30,17 @@ export async function POST(request: NextRequest) {
     // Request body'sini al
     const body = await request.text();
     const signature = request.headers.get('x-iyzipay-signature');
-    const secretKey = process.env.NEXT_PUBLIC_IYZICO_SECRET_KEY || '';
+    const secretKey = process.env.IYZICO_SECRET_KEY || '';
 
-    console.log('🔔 Webhook alındı:', body);
+    console.log('🔔 Webhook alındı, eventType:', JSON.parse(body)?.eventType || 'unknown');
 
     // Signature doğrulaması (güvenlik için)
     if (!verifyWebhookSignature(body, signature, secretKey)) {
       console.warn('⚠️ Webhook signature doğrulaması başarısız');
-      // Geliştirme aşamasında geçici olarak atla (production'da kesinlikle doğrula)
-      // return NextResponse.json(
-      //   { success: false, error: 'Invalid signature' },
-      //   { status: 401 }
-      // );
+      return NextResponse.json(
+        { success: false, error: 'Invalid signature' },
+        { status: 401 }
+      );
     }
 
     // JSON'a dönüştür
@@ -112,7 +118,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'Webhook alındı ama database kaydı başarısız',
-          error: dbError instanceof Error ? dbError.message : 'Unknown error',
         });
       }
     } else if (webhookData.status === 'failure' || webhookData.paymentStatus === 'FAILURE') {

@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-// GET - Tüm ürünleri getir
+// Session store — admin auth ile paylaşılıyor
+const sessions = ((globalThis as Record<string, unknown>).__admin_sessions as Map<string, { email: string; expiresAt: number }>) || new Map();
+
+function isAdminAuthenticated(request: NextRequest): boolean {
+  const token = request.cookies.get('adminToken')?.value;
+  if (!token || !sessions.has(token)) return false;
+  const session = sessions.get(token)!;
+  if (Date.now() > session.expiresAt) {
+    sessions.delete(token);
+    return false;
+  }
+  return true;
+}
+
+// GET - Tüm ürünleri getir (public - listing için gerekli)
 export async function GET() {
   try {
     const { data, error } = await supabase
@@ -20,9 +34,12 @@ export async function GET() {
   }
 }
 
-// POST - Yeni ürün ekle
+// POST - Yeni ürün ekle (admin only)
 export async function POST(request: NextRequest) {
   try {
+    if (!isAdminAuthenticated(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     
     const { data, error } = await supabase

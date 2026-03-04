@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+// Session store — admin auth ile paylaşılıyor
+const sessions = ((globalThis as Record<string, unknown>).__admin_sessions as Map<string, { email: string; expiresAt: number }>) || new Map();
+
+function isAdminAuthenticated(request: NextRequest): boolean {
+  const token = request.cookies.get('adminToken')?.value;
+  if (!token || !sessions.has(token)) return false;
+  const session = sessions.get(token)!;
+  if (Date.now() > session.expiresAt) {
+    sessions.delete(token);
+    return false;
+  }
+  return true;
+}
+
 // GET - Tek ürün getir
 export async function GET(
   request: NextRequest,
@@ -24,12 +38,15 @@ export async function GET(
   }
 }
 
-// PUT - Ürün güncelle
+// PUT - Ürün güncelle (admin only)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isAdminAuthenticated(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { id } = await params;
     const body = await request.json();
 
@@ -69,12 +86,15 @@ export async function PUT(
   }
 }
 
-// DELETE - Ürün sil
+// DELETE - Ürün sil (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isAdminAuthenticated(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { id } = await params;
     
     // Önce ürünün resimlerini al (storage'dan silmek için)

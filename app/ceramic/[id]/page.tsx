@@ -1,311 +1,110 @@
-'use client';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { fetchProducts, getCeramicProductById, ceramicProducts } from '@/data/ceramicProducts';
+import CeramicDetailClient from './CeramicDetailClient';
 
-import { useParams } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { getCeramicProductById, ceramicProducts } from '@/data/ceramicProducts';
-import { CeramicProduct } from '@/types/ceramic';
-import { CeramicProductCard } from '@/components/CeramicProductCard';
-import { ImageZoom } from '@/components/ImageZoom';
-import { useCart } from '@/context/CeramicCartContext';
-import { useState, useEffect } from 'react';
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-export default function CeramicDetailPage() {
-  const params = useParams();
-  const productId = params.id as string;
-  const localProduct = getCeramicProductById(productId);
-  const [product, setProduct] = useState<CeramicProduct | null | undefined>(localProduct);
-  const [allProducts, setAllProducts] = useState<CeramicProduct[]>(ceramicProducts);
-  const { addToCart } = useCart();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [zoomedImageIndex, setZoomedImageIndex] = useState<number | null>(null);
-  const [loadingProduct, setLoadingProduct] = useState(!localProduct);
-
-  useEffect(() => {
-    // Supabase'den güncel veriyi çek
-    Promise.all([
-      fetch(`/api/products?id=${productId}`).then(r => r.json()).catch(() => null),
-      fetch('/api/products').then(r => r.json()).catch(() => []),
-    ]).then(([productData, productsData]) => {
-      if (productData && productData.id) setProduct(productData);
-      if (Array.isArray(productsData) && productsData.length > 0) setAllProducts(productsData);
-      setLoadingProduct(false);
-    });
-  }, [productId]);
-
-  if (loadingProduct) {
-    return (
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-20 text-center">
-        <p className="text-earth">Yükleniyor...</p>
-      </div>
-    );
-  }
+// Dinamik meta etiketleri — Google ürün bilgilerini görsün
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = getCeramicProductById(id);
 
   if (!product) {
-    return (
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-20 text-center">
-        <h1 className="heading-serif text-3xl text-charcoal mb-4">Ürün Bulunamadı</h1>
-        <Link href="/ceramics" className="text-accent hover:text-charcoal transition-colors">
-          Koleksiyona dön
-        </Link>
-      </div>
-    );
+    return { title: 'Ürün Bulunamadı' };
+  }
+
+  const imageUrl = product.images[0]?.startsWith('http')
+    ? product.images[0]
+    : `https://elsdreamfactory.com${product.images[0]}`;
+
+  return {
+    title: `${product.name} | El Yapımı Seramik`,
+    description: product.description,
+    keywords: `${product.name}, ${product.category}, el yapımı seramik, ${product.clayType}, seramik hediye`,
+    openGraph: {
+      title: `${product.name} | El's Dream Factory`,
+      description: product.description,
+      type: 'website',
+      url: `https://elsdreamfactory.com/ceramic/${product.id}`,
+      images: [{ url: imageUrl, width: 800, height: 800, alt: product.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | El's Dream Factory`,
+      description: product.description,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: `https://elsdreamfactory.com/ceramic/${product.id}`,
+    },
+  };
+}
+
+// Statik sayfa oluşturma — build zamanında tüm ürün sayfaları oluşturulur
+export async function generateStaticParams() {
+  return ceramicProducts.map((product) => ({
+    id: String(product.id),
+  }));
+}
+
+export default async function CeramicDetailPage({ params }: PageProps) {
+  const { id } = await params;
+
+  // Sunucuda ürünleri çek
+  const allProducts = await fetchProducts();
+  const product = allProducts.find((p) => String(p.id) === String(id)) || getCeramicProductById(id);
+
+  if (!product) {
+    notFound();
   }
 
   const relatedProducts = allProducts
-    .filter(p => p.category === product.category && p.id !== product.id)
+    .filter((p) => p.category === product.category && String(p.id) !== String(product.id))
     .slice(0, 4);
 
-  const clayTypeLabels: Record<string, string> = {
-    stoneware: 'Stoneware',
-    porcelain: 'Porselen',
-    earthenware: 'Toprak Çanak',
-    'bone-china': 'Kemik Porseleni',
-    terracotta: 'Terracotta',
-  };
-
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
-    setAddedToCart(true);
-    setQuantity(1);
-    setTimeout(() => setAddedToCart(false), 2000);
-  };
-
   return (
-    <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-12">
-      {/* Breadcrumb */}
-      <div className="mb-8 text-sm text-earth">
-        <Link href="/" className="hover:text-amber-600">Ana Sayfa</Link>
-        <span className="mx-2">›</span>
-        <Link href="/ceramics" className="hover:text-amber-600">Seramik Ürünleri</Link>
-        <span className="mx-2">›</span>
-        <span className="text-gray-900">{product.name}</span>
-      </div>
-
-      {/* Product Detail */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        {/* Image Section with Zoom */}
-        <div>
-          {/* Main Image with Zoom */}
-          <div className="mb-4">
-            {zoomedImageIndex !== null ? (
-              <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-                <div className="relative w-full max-w-4xl bg-white rounded-lg p-6">
-                  <button
-                    onClick={() => setZoomedImageIndex(null)}
-                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium z-10"
-                  >
-                    Kapat ✕
-                  </button>
-                  <ImageZoom
-                    src={product.images[zoomedImageIndex]}
-                    alt={`${product.name} - Yakınlaştırma`}
-                  />
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setZoomedImageIndex(currentImageIndex)}
-                className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden group cursor-zoom-in"
-              >
-                <Image
-                  src={product.images[currentImageIndex]}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform"
-                  priority
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
-                  <div className="bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    Yakınlaştır
-                  </div>
-                </div>
-                {product.handmade && (
-                  <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    El Yapımı
-                  </div>
-                )}
-              </button>
-            )}
-          </div>
-
-          {/* Thumbnail Gallery */}
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {product.images.map((image, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentImageIndex(idx)}
-                className={`relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border-3 transition-all hover:border-amber-400 ${
-                  idx === currentImageIndex ? 'border-amber-600 scale-105' : 'border-gray-300'
-                }`}
-              >
-                <Image
-                  src={image}
-                  alt={`${product.name} - Görüntü ${idx + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Product Info */}
-        <div>
-          <div className="mb-4">
-            <span className="inline-block bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-medium mb-2">
-              {product.category}
-            </span>
-            <span className="inline-block ml-2 bg-amber-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-              {clayTypeLabels[product.clayType]}
-            </span>
-          </div>
-
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
-
-          {/* Rating */}
-          <div className="flex items-center gap-4 mb-6">
-            <span className="text-4xl font-bold text-amber-600">₺{product.price}</span>
-            <div className="flex items-center">
-              <span className="text-yellow-400">★ ★ ★ ★ ★</span>
-              <span className="ml-2 text-gray-600">(45 Değerlendirme)</span>
-            </div>
-          </div>
-
-          {/* Description */}
-          <p className="text-gray-700 text-lg mb-6 leading-relaxed">
-            {product.description}
-          </p>
-
-          {/* Features */}
-          <div className="bg-amber-50 rounded-lg p-6 mb-6 border border-amber-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Özellikleri</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <span className="text-amber-600 font-bold mr-3">✓</span>
-                <span className="text-gray-700">
-                  <strong>Çamur Tipi:</strong> {clayTypeLabels[product.clayType]}
-                </span>
-              </li>
-              {product.glaze && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">
-                    <strong>Cilası:</strong> {product.glaze}
-                  </span>
-                </li>
-              )}
-              {product.weight && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">
-                    <strong>Ağırlık:</strong> {product.weight}g
-                  </span>
-                </li>
-              )}
-              {product.dimensions && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">
-                    <strong>Boyutlar:</strong>{' '}
-                    {product.dimensions.height && `Y: ${product.dimensions.height}cm `}
-                    {product.dimensions.width && `G: ${product.dimensions.width}cm `}
-                    {product.dimensions.diameter && `Ç: ${product.dimensions.diameter}cm`}
-                  </span>
-                </li>
-              )}
-              {product.dishwasherSafe && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">Bulaşık makinesinde güvenli</span>
-                </li>
-              )}
-              {product.microwave && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">Mikrodalgada güvenli</span>
-                </li>
-              )}
-              {product.handmade && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">El yapımı, benzersiz tasarım</span>
-                </li>
-              )}
-            </ul>
-          </div>
-
-          {/* Stock Status */}
-          <div className="mb-8">
-            {product.stock > 0 ? (
-              <p className="text-green-600 font-semibold text-lg">✓ Stokta Var ({product.stock} adet)</p>
-            ) : (
-              <p className="text-red-600 font-semibold text-lg">✗ Stokta Yok</p>
-            )}
-          </div>
-
-          {/* Add to Cart */}
-          <div className="flex gap-3 mb-8">
-            <div className="flex items-center border border-gray-300 rounded-lg">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-4 py-3 hover:bg-gray-100 transition-colors"
-              >
-                −
-              </button>
-              <input
-                type="number"
-                min="1"
-                max={product.stock}
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-16 text-center border-l border-r border-gray-300 py-2 focus:outline-none"
-              />
-              <button
-                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                className="px-4 py-3 hover:bg-gray-100 transition-colors"
-              >
-                +
-              </button>
-            </div>
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-              className={`flex-1 font-bold py-3 px-6 rounded-lg transition-colors text-white ${
-                addedToCart
-                  ? 'bg-green-600'
-                  : product.stock === 0
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-amber-600 hover:bg-amber-700'
-              }`}
-            >
-              {addedToCart ? '✓ Sepete Eklendi' : 'Sepete Ekle'}
-            </button>
-          </div>
-
-          {/* Back Link */}
-          <Link
-            href="/ceramics"
-            className="block text-center text-amber-600 hover:text-amber-800 font-medium"
-          >
-            ← Seramik ürünlerine dön
-          </Link>
-        </div>
-      </div>
-
-      {/* Related Products */}
-      {relatedProducts.length > 0 && (
-        <section className="mt-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">İlgili Ürünler</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map(relatedProduct => (
-              <CeramicProductCard key={relatedProduct.id} product={relatedProduct} />
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
+    <>
+      {/* JSON-LD Product Schema — Google zengin sonuçları */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            description: product.description,
+            image: product.images.map((img) =>
+              img.startsWith('http') ? img : `https://elsdreamfactory.com${img}`
+            ),
+            brand: {
+              '@type': 'Brand',
+              name: "El's Dream Factory",
+            },
+            offers: {
+              '@type': 'Offer',
+              url: `https://elsdreamfactory.com/ceramic/${product.id}`,
+              priceCurrency: 'TRY',
+              price: product.price.toFixed(2),
+              availability: product.stock > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+              seller: {
+                '@type': 'Organization',
+                name: "El's Dream Factory",
+              },
+            },
+            category: product.category,
+            material: product.clayType,
+            ...(product.weight && {
+              weight: { '@type': 'QuantitativeValue', value: product.weight, unitCode: 'GRM' },
+            }),
+          }),
+        }}
+      />
+      <CeramicDetailClient product={product} relatedProducts={relatedProducts} />
+    </>
   );
 }

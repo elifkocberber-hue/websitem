@@ -55,9 +55,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_IYZICO_API_KEY || '';
-    const secretKey = process.env.NEXT_PUBLIC_IYZICO_SECRET_KEY || '';
-    const baseUrl = process.env.NEXT_PUBLIC_IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
+    const apiKey = process.env.IYZICO_API_KEY || '';
+    const secretKey = process.env.IYZICO_SECRET_KEY || '';
+    const baseUrl = process.env.IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
+
+    // Server-side fiyat doğrulaması — client'ın gönderdiği fiyata güvenme
+    let verifiedTotal = 0;
+    for (const item of items) {
+      const { data: dbProduct } = await (await import('@/lib/supabase')).supabase
+        .from('products')
+        .select('price, stock')
+        .eq('id', item.id)
+        .single();
+
+      if (!dbProduct) {
+        // Supabase'de yoksa yerel veriden kontrol et
+        const { getCeramicProductById } = await import('@/data/ceramicProducts');
+        const localProduct = getCeramicProductById(item.id);
+        if (!localProduct) {
+          return NextResponse.json(
+            { success: false, error: `Ürün bulunamadı: ${item.name}` },
+            { status: 400 }
+          );
+        }
+        verifiedTotal += localProduct.price * (item.quantity || 1);
+      } else {
+        if (dbProduct.stock < (item.quantity || 1)) {
+          return NextResponse.json(
+            { success: false, error: `Yetersiz stok: ${item.name}` },
+            { status: 400 }
+          );
+        }
+        verifiedTotal += dbProduct.price * (item.quantity || 1);
+      }
+    }
+
+    // Fiyat farkı %1'den fazlaysa reddet (yuvarlama toleransı)
+    if (Math.abs(verifiedTotal - totalPrice) > verifiedTotal * 0.01) {
+      return NextResponse.json(
+        { success: false, error: 'Fiyat uyuşmazlığı tespit edildi. Lütfen sayfayı yenileyip tekrar deneyin.' },
+        { status: 400 }
+      );
+    }
 
     // Prepare payment payload
     const conversationId = generateRandomId();
@@ -139,7 +178,7 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
 
-    console.log('Iyzico Response:', result);
+    console.log('Iyzico payment status:', result.status, 'paymentId:', result.paymentId || 'N/A');
 
     if (result.status === 'success') {
       try {

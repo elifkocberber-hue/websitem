@@ -5,8 +5,9 @@ import { checkRateLimit, getRateLimitKey } from '@/lib/rateLimit';
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@elsdreamfactory.com';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 
-// Simple session store (production'da database veya Redis kullan)
-const sessions = new Map<string, { email: string; expiresAt: number }>();
+// Session store — global'de paylaşılarak orders route ile senkronize (production'da Redis/DB kullanılmalı)
+const sessions = ((globalThis as Record<string, unknown>).__admin_sessions as Map<string, { email: string; expiresAt: number }>) || new Map<string, { email: string; expiresAt: number }>();
+(globalThis as Record<string, unknown>).__admin_sessions = sessions;
 
 function generateSessionToken(): string {
   return require('crypto').randomBytes(32).toString('hex');
