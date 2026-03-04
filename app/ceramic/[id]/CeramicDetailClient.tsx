@@ -127,13 +127,9 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
 
           <h1 className="text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
 
-          {/* Rating */}
+          {/* Rating - placeholder */}
           <div className="flex items-center gap-4 mb-6">
             <span className="text-4xl font-bold text-amber-600">₺{product.price}</span>
-            <div className="flex items-center">
-              <span className="text-yellow-400">★ ★ ★ ★ ★</span>
-              <span className="ml-2 text-gray-600">(45 Değerlendirme)</span>
-            </div>
           </div>
 
           {/* Description */}
@@ -222,7 +218,10 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                 min="1"
                 max={product.stock}
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 1;
+                  setQuantity(Math.min(product.stock, Math.max(1, val)));
+                }}
                 className="w-16 text-center border-l border-r border-gray-300 py-2 focus:outline-none"
               />
               <button

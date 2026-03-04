@@ -59,7 +59,7 @@ export const SearchBar: React.FC = () => {
 
     setResults(filtered);
     setIsOpen(filtered.length > 0);
-  }, [query]);
+  }, [query, products]);
 
   // Close on click outside
   useEffect(() => {

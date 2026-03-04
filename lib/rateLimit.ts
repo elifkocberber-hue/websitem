@@ -5,6 +5,20 @@ interface RateLimitEntry {
 }
 
 const rateLimitStore = new Map<string, RateLimitEntry>();
+let lastCleanup = Date.now();
+
+// Lazy cleanup: runs during rate limit checks instead of setInterval
+function cleanupIfNeeded() {
+  const now = Date.now();
+  // Clean up at most once per 5 minutes
+  if (now - lastCleanup < 5 * 60 * 1000) return;
+  lastCleanup = now;
+  for (const [key, entry] of rateLimitStore.entries()) {
+    if (now > entry.resetTime) {
+      rateLimitStore.delete(key);
+    }
+  }
+}
 
 export function getRateLimitKey(request: Request, prefix: string): string {
   // Get client IP
@@ -21,6 +35,7 @@ export function checkRateLimit(
   maxRequests: number = 5,
   windowMs: number = 15 * 60 * 1000 // 15 minutes
 ): { allowed: boolean; remaining: number } {
+  cleanupIfNeeded();
   const now = Date.now();
   const entry = rateLimitStore.get(key);
 
@@ -51,13 +66,3 @@ export function checkRateLimit(
   entry.count++;
   return { allowed: true, remaining: maxRequests - entry.count };
 }
-
-// Cleanup old entries every hour
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitStore.delete(key);
-    }
-  }
-}, 60 * 60 * 1000);

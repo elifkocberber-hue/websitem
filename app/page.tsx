@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { fetchProducts } from '@/data/ceramicProducts';
 import { CeramicProductCard } from '@/components/CeramicProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { NewsletterForm } from '@/components/NewsletterForm';
 
 export default async function Home() {
   const allProducts = await fetchProducts();
@@ -219,16 +220,7 @@ export default async function Home() {
             <p className="text-earth text-sm mb-8">
               Yeni koleksiyonlar, özel teklifler ve atölyeden haberler.
             </p>
-            <div className="flex gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="E-posta adresiniz"
-                className="flex-1 px-5 py-3 bg-transparent border border-charcoal/20 text-sm text-charcoal placeholder:text-clay focus:outline-none focus:border-accent transition-colors"
-              />
-              <button className="bg-charcoal text-bone px-6 py-3 text-sm tracking-wider uppercase hover:bg-accent transition-colors duration-300">
-                Abone
-              </button>
-            </div>
+            <NewsletterForm />
           </div>
         </ScrollReveal>
       </section>

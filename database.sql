@@ -140,3 +140,38 @@ CREATE POLICY "Anyone can update visitor duration" ON visitors
 
 CREATE POLICY "Admins can view visitor data" ON visitors
   FOR SELECT USING (true);
+
+-- Site Users table (customer accounts with hashed passwords)
+CREATE TABLE IF NOT EXISTS site_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_site_users_email ON site_users(email);
+
+ALTER TABLE site_users ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service role can manage site_users" ON site_users
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Newsletter Subscribers table
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscribers(email);
+
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can subscribe to newsletter" ON newsletter_subscribers
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Service role can view subscribers" ON newsletter_subscribers
+  FOR SELECT USING (true);

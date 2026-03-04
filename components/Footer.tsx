@@ -41,7 +41,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-[11px] tracking-[0.2em] uppercase text-clay mb-5">Takip Et</h4>
             <ul className="space-y-3">
               <li><a href="https://instagram.com/elsdreamfactory" target="_blank" rel="noopener noreferrer" className="text-sm text-bone/60 hover:text-bone transition-colors">Instagram</a></li>
-              <li><a href="#" className="text-sm text-bone/60 hover:text-bone transition-colors">Pinterest</a></li>
+              <li><a href="https://pinterest.com/elsdreamfactory" target="_blank" rel="noopener noreferrer" className="text-sm text-bone/60 hover:text-bone transition-colors">Pinterest</a></li>
             </ul>
           </div>
         </div>

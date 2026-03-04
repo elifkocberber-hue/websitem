@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
+    if (!isAdminAuthenticated(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get('days') || '7');
     
@@ -18,7 +23,6 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Analytics fetch error:', error);
       return NextResponse.json({ error: 'Veri alınamadı' }, { status: 500 });
     }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import { getOrCreateUser, createOrder, createOrderItems } from '@/lib/supabase';
 import { validateCustomerData } from '@/lib/validation';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rateLimit';
@@ -102,6 +102,21 @@ export async function POST(request: NextRequest) {
     const conversationId = generateRandomId();
     const requestId = generateRandomId();
 
+    // Validate card data from customer
+    if (!customer.cardNumber || !customer.expireMonth || !customer.expireYear || !customer.cvc || !customer.cardHolderName) {
+      return NextResponse.json(
+        { success: false, error: 'Kart bilgileri eksik' },
+        { status: 400 }
+      );
+    }
+
+    // Get client IP from headers
+    const clientIp =
+      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      request.headers.get('cf-connecting-ip') ||
+      request.headers.get('x-real-ip') ||
+      '0.0.0.0';
+
     const paymentPayload = {
       locale: 'tr',
       conversationId: conversationId,
@@ -112,11 +127,11 @@ export async function POST(request: NextRequest) {
       paymentChannel: 'WEB',
       paymentGroup: 'PRODUCT',
       paymentCard: {
-        cardHolderName: `${customer.firstName} ${customer.lastName}`,
-        cardNumber: '5528790000000008', // Test card (success)
-        expireMonth: '12',
-        expireYear: '2030',
-        cvc: '123',
+        cardHolderName: customer.cardHolderName,
+        cardNumber: customer.cardNumber.replace(/\s/g, ''),
+        expireMonth: customer.expireMonth,
+        expireYear: customer.expireYear,
+        cvc: customer.cvc,
       },
       buyer: {
         id: generateRandomId(),
@@ -124,11 +139,11 @@ export async function POST(request: NextRequest) {
         surname: customer.lastName,
         gsmNumber: customer.phone,
         email: customer.email,
-        identityNumber: '12345678901',
+        identityNumber: customer.identityNumber || '11111111111',
         lastLoginDate: new Date().toISOString(),
         registrationDate: new Date().toISOString(),
         registrationAddress: customer.address,
-        ip: '85.34.78.112',
+        ip: clientIp,
         city: customer.city,
         country: 'Turkey',
         zipCode: customer.postalCode,
@@ -178,8 +193,6 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
 
-    console.log('Iyzico payment status:', result.status, 'paymentId:', result.paymentId || 'N/A');
-
     if (result.status === 'success') {
       try {
         // Create user in Supabase
@@ -215,7 +228,6 @@ export async function POST(request: NextRequest) {
           message: 'Ödeme başarılı',
         });
       } catch (dbError) {
-        console.error('Database error:', dbError);
         // Payment succeeded but database error - still return success to user
         return NextResponse.json({
           success: true,
@@ -251,7 +263,6 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('API Error:', error);
     return NextResponse.json(
       { success: false, error: 'Bir hata oluştu' },
       { status: 500 }

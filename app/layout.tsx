@@ -45,9 +45,9 @@ export const metadata: Metadata = {
     "handmade pottery gifts",
   ],
 
-  // Verification
+  // Verification — Google Search Console'dan alınan gerçek kodu .env dosyasından oku
   verification: {
-    google: "google_verification_code_here", // Google Search Console
+    google: process.env.GOOGLE_VERIFICATION_CODE || '',
   },
 
   // Open Graph (Social Media)
@@ -147,7 +147,6 @@ export default function RootLayout({
                 "@type": "ContactPoint",
                 contactType: "Customer Service",
                 email: "elsdreamfactory@gmail.com",
-                telephone: "+90-555-123-4567",
                 availableLanguage: ["Turkish", "English"],
               },
             }),
@@ -248,4 +247,3 @@ export default function RootLayout({
     </html>
   );
 }
-// Cache bust: 1772315049

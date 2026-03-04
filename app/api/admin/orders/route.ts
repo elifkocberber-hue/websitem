@@ -1,20 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-
-// Session store — auth route ile paylaşılıyor (production'da Redis/DB kullanılmalı)
-const sessions = (globalThis as Record<string, unknown>).__admin_sessions as Map<string, { email: string; expiresAt: number }> || new Map();
-(globalThis as Record<string, unknown>).__admin_sessions = sessions;
-
-function isAdminAuthenticated(request: NextRequest): boolean {
-  const token = request.cookies.get('adminToken')?.value;
-  if (!token || !sessions.has(token)) return false;
-  const session = sessions.get(token)!;
-  if (Date.now() > session.expiresAt) {
-    sessions.delete(token);
-    return false;
-  }
-  return true;
-}
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,7 +43,6 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Orders fetch error:', error);
       return NextResponse.json(
         { error: 'Siparişler alınamadı' },
         { status: 500 }
@@ -71,8 +56,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
     });
-  } catch (error) {
-    console.error('API error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Bir hata oluştu' },
       { status: 500 }

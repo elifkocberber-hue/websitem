@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isAdminAuthenticated(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -38,7 +43,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
       return NextResponse.json({ error: 'Resim yüklenemedi: ' + uploadError.message }, { status: 500 });
     }
 
@@ -51,8 +55,7 @@ export async function POST(request: NextRequest) {
       url: urlData.publicUrl,
       path: filePath,
     });
-  } catch (err) {
-    console.error('Upload error:', err);
+  } catch {
     return NextResponse.json({ error: 'Bir hata oluştu' }, { status: 500 });
   }
 }

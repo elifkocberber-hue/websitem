@@ -1,22 +1,20 @@
 import { NextResponse } from 'next/server';
-
-// Shared in-memory user store
-const users: Map<string, { id: string; email: string; password: string; firstName: string; lastName: string }> = new Map();
-
-// Make it accessible globally for the login route
-if (typeof globalThis !== 'undefined') {
-  (globalThis as Record<string, unknown>).__users_store = (globalThis as Record<string, unknown>).__users_store || users;
-}
-
-function getUserStore() {
-  if (typeof globalThis !== 'undefined' && (globalThis as Record<string, unknown>).__users_store) {
-    return (globalThis as Record<string, unknown>).__users_store as typeof users;
-  }
-  return users;
-}
+import * as bcrypt from 'bcrypt';
+import { supabase } from '@/lib/supabase';
+import { checkRateLimit, getRateLimitKey } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitKey = getRateLimitKey(request, 'register');
+    const { allowed } = checkRateLimit(rateLimitKey, 5, 60 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Çok fazla kayıt denemesi. Lütfen daha sonra tekrar deneyin.' },
+        { status: 429 }
+      );
+    }
+
     const { email, password, firstName, lastName } = await request.json();
 
     if (!email || !password || !firstName || !lastName) {
@@ -32,28 +30,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Geçerli bir e-posta adresi giriniz' }, { status: 400 });
     }
 
-    const store = getUserStore();
-    if (store.has(email.toLowerCase())) {
+    // Sanitize inputs
+    const sanitizedEmail = email.toLowerCase().trim();
+    const sanitizedFirstName = firstName.trim().slice(0, 100);
+    const sanitizedLastName = lastName.trim().slice(0, 100);
+
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('site_users')
+      .select('id')
+      .eq('email', sanitizedEmail)
+      .single();
+
+    if (existingUser) {
       return NextResponse.json({ error: 'Bu e-posta adresi zaten kayıtlı' }, { status: 409 });
     }
 
-    const id = crypto.randomUUID();
-    const newUser = {
-      id,
-      email: email.toLowerCase(),
-      password,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-    };
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 12);
 
-    store.set(email.toLowerCase(), newUser);
+    // Insert to Supabase
+    const { data: newUser, error } = await supabase
+      .from('site_users')
+      .insert({
+        email: sanitizedEmail,
+        password_hash: passwordHash,
+        first_name: sanitizedFirstName,
+        last_name: sanitizedLastName,
+      })
+      .select('id, email, first_name, last_name')
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        return NextResponse.json({ error: 'Bu e-posta adresi zaten kayıtlı' }, { status: 409 });
+      }
+      return NextResponse.json({ error: 'Kayıt sırasında bir hata oluştu' }, { status: 500 });
+    }
 
     return NextResponse.json({
       user: {
         id: newUser.id,
         email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
+        firstName: newUser.first_name,
+        lastName: newUser.last_name,
       },
     }, { status: 201 });
   } catch {

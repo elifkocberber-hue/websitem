@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 // Disable static generation for this route
 export const dynamic = 'force-dynamic';
-
-function isAdminAuthenticated(request: NextRequest): boolean {
-  const token = request.cookies.get('adminToken')?.value;
-  return !!token;
-}
 
 export async function GET(
   request: NextRequest,
@@ -60,7 +56,7 @@ export async function GET(
       .eq('order_id', orderId);
 
     if (itemsError) {
-      console.error('Order items error:', itemsError);
+      // log silently
     }
 
     return NextResponse.json({
@@ -70,8 +66,7 @@ export async function GET(
         items: orderItems || [],
       },
     });
-  } catch (error) {
-    console.error('API error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Bir hata oluştu' },
       { status: 500 }
@@ -111,7 +106,6 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error('Update error:', error);
       return NextResponse.json(
         { error: 'Sipariş güncellenemedi' },
         { status: 500 }
@@ -123,8 +117,7 @@ export async function PATCH(
       message: 'Sipariş başarıyla güncellendi',
       order: data,
     });
-  } catch (error) {
-    console.error('API error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Bir hata oluştu' },
       { status: 500 }

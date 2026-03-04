@@ -1,36 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rateLimit';
+import { adminSessions } from '@/lib/adminAuth';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@elsdreamfactory.com';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 
-// Session store — global'de paylaşılarak orders route ile senkronize (production'da Redis/DB kullanılmalı)
-const sessions = ((globalThis as Record<string, unknown>).__admin_sessions as Map<string, { email: string; expiresAt: number }>) || new Map<string, { email: string; expiresAt: number }>();
-(globalThis as Record<string, unknown>).__admin_sessions = sessions;
-
 function generateSessionToken(): string {
-  return require('crypto').randomBytes(32).toString('hex');
+  return crypto.randomBytes(32).toString('hex');
 }
 
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get('adminToken')?.value;
 
-    if (!token || !sessions.has(token)) {
+    if (!token || !adminSessions.has(token)) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    const session = sessions.get(token)!;
+    const session = adminSessions.get(token)!;
 
     if (Date.now() > session.expiresAt) {
-      sessions.delete(token);
+      adminSessions.delete(token);
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
     return NextResponse.json({ authenticated: true, email: session.email });
-  } catch (error) {
-    console.error('Auth check error:', error);
+  } catch {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 }
@@ -39,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: max 5 login attempts per 15 minutes
     const rateLimitKey = getRateLimitKey(request, 'admin-login');
-    const { allowed, remaining } = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
+    const { allowed } = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
 
     if (!allowed) {
       return NextResponse.json(
@@ -80,7 +77,7 @@ export async function POST(request: NextRequest) {
     const sessionDuration = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 7 gün veya 24 saat
     const expiresAt = Date.now() + sessionDuration;
 
-    sessions.set(token, { email, expiresAt });
+    adminSessions.set(token, { email, expiresAt });
 
     const response = NextResponse.json({
       success: true,
@@ -96,8 +93,7 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Login hatası' },
       { status: 500 }
@@ -110,15 +106,14 @@ export async function DELETE(request: NextRequest) {
     const token = request.cookies.get('adminToken')?.value;
 
     if (token) {
-      sessions.delete(token);
+      adminSessions.delete(token);
     }
 
     const response = NextResponse.json({ success: true, message: 'Çıkış yapıldı' });
     response.cookies.delete('adminToken');
 
     return response;
-  } catch (error) {
-    console.error('Logout error:', error);
+  } catch {
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

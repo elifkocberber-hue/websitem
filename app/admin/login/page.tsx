@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/context/AdminContext';
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState('admin@elsdreamfactory.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -104,18 +104,6 @@ export default function AdminLoginPage() {
               {loading ? '🔄 Giriş yapılıyor...' : '🔐 Giriş Yap'}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-600 mb-3 font-medium">Demo Kimlik Bilgileri:</p>
-            <div className="bg-gray-50 p-3 rounded text-xs space-y-1">
-              <p><strong>E-posta:</strong> admin@elsdreamfactory.com</p>
-              <p><strong>Şifre:</strong> admin123</p>
-            </div>
-            <p className="text-xs text-gray-500 mt-3">
-              ⚠️ Production'da güvenli şifre kullanın!
-            </p>
-          </div>
         </div>
 
         {/* Back Link */}

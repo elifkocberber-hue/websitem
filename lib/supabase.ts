@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Only validate on server-side or if both are available
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set');
+}
+
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export { supabase };
@@ -55,7 +58,6 @@ export const getOrCreateUser = async (email: string, firstName: string, lastName
     if (error) throw error;
     return data as User;
   } catch (error) {
-    console.error('Error getting/creating user:', error);
     throw error;
   }
 };
@@ -85,7 +87,6 @@ export const createOrder = async (
     if (error) throw error;
     return data as Order;
   } catch (error) {
-    console.error('Error creating order:', error);
     throw error;
   }
 };
@@ -117,7 +118,6 @@ export const createOrderItems = async (
     if (error) throw error;
     return data as OrderItem[];
   } catch (error) {
-    console.error('Error creating order items:', error);
     throw error;
   }
 };
@@ -137,7 +137,6 @@ export const getUserOrders = async (userId: string) => {
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error fetching user orders:', error);
     throw error;
   }
 };
@@ -157,7 +156,6 @@ export const getOrderDetails = async (orderId: string) => {
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error fetching order details:', error);
     throw error;
   }
 };
@@ -175,7 +173,6 @@ export const updateOrderStatus = async (orderId: string, status: string) => {
     if (error) throw error;
     return data as Order;
   } catch (error) {
-    console.error('Error updating order status:', error);
     throw error;
   }
 };

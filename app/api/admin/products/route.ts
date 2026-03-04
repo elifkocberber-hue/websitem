@@ -1,19 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-
-// Session store — admin auth ile paylaşılıyor
-const sessions = ((globalThis as Record<string, unknown>).__admin_sessions as Map<string, { email: string; expiresAt: number }>) || new Map();
-
-function isAdminAuthenticated(request: NextRequest): boolean {
-  const token = request.cookies.get('adminToken')?.value;
-  if (!token || !sessions.has(token)) return false;
-  const session = sessions.get(token)!;
-  if (Date.now() > session.expiresAt) {
-    sessions.delete(token);
-    return false;
-  }
-  return true;
-}
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 // GET - Tüm ürünleri getir (public - listing için gerekli)
 export async function GET() {
@@ -24,7 +11,6 @@ export async function GET() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Products fetch error:', error);
       return NextResponse.json({ error: 'Ürünler alınamadı' }, { status: 500 });
     }
 
