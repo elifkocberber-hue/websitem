@@ -71,39 +71,7 @@ body {
   line-height: 1.08;
 }
 
-/* ── Custom Cursor (desktop only) ── */
 
-@media (hover: hover) and (pointer: fine) {
-  html,
-  a, button, [role="button"], input, select, textarea, label {
-    cursor: none !important;
-  }
-
-  .custom-cursor {
-    position: fixed;
-    width: 28px;
-    height: 28px;
-    border: 1.5px solid var(--charcoal);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99999;
-    transform: translate(-50%, -50%);
-    transition:
-      width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-      height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 0.25s ease,
-      background-color 0.25s ease;
-    mix-blend-mode: difference;
-    background-color: transparent;
-  }
-
-  .custom-cursor--hover {
-    width: 52px;
-    height: 52px;
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: #fff;
-  }
-}
 
 /* ── Scroll Reveal Animations ── */
 

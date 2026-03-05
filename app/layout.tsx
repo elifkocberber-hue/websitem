@@ -6,7 +6,7 @@ import { CartProvider } from "@/context/CeramicCartContext";
 import { AdminProvider } from "@/context/AdminContext";
 import { UserProvider } from "@/context/UserContext";
 import { Header, Footer } from "@/components";
-import { CustomCursor } from "@/components/CustomCursor";
+
 import { CookieConsent } from "@/components/CookieConsent";
 import { VisitorTracker } from "@/components/VisitorTracker";
 
@@ -230,7 +230,6 @@ export default function RootLayout({
         <AdminProvider>
           <UserProvider>
           <CartProvider>
-            <CustomCursor />
             <CookieConsent />
             <VisitorTracker />
             <div className="flex flex-col min-h-screen">
