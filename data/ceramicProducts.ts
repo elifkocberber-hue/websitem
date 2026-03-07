@@ -27,23 +27,44 @@ export const getCeramicProductById = (id: number | string): CeramicProduct | und
   return ceramicProducts.find(product => String(product.id) === String(id));
 };
 
-// Supabase'den tek ürün çek — cache yok, her zaman taze veri
+// Supabase'den tek ürün çek — HTTP olmadan, doğrudan sorgu
 export async function fetchProductById(id: string): Promise<CeramicProduct | undefined> {
   try {
-    const baseUrl = typeof window !== 'undefined'
-      ? ''
-      : (process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'));
-    const res = await fetch(`${baseUrl}/api/products?id=${encodeURIComponent(id)}`, {
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data) return data as CeramicProduct;
-    }
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) return getCeramicProductById(id);
+
+    const client = createClient(supabaseUrl, supabaseKey);
+    const { data, error } = await client
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) return getCeramicProductById(id);
+
+    const p = data as Record<string, unknown>;
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      stock: p.stock,
+      clayType: p.clay_type,
+      category: p.category,
+      handmade: p.handmade,
+      glaze: p.glaze,
+      dimensions: (p.dimensions as Record<string, number>) || {},
+      weight: p.weight,
+      dishwasherSafe: p.dishwasher_safe,
+      microwave: p.microwave,
+      images: (p.images as string[]) || [],
+      featured: p.featured,
+    } as CeramicProduct;
   } catch {
-    // Supabase erişilemezse yerel veriye düş
+    return getCeramicProductById(id);
   }
-  return getCeramicProductById(id);
 }
 
 export const getCeramicProductsByCategory = (category: string): CeramicProduct[] => {
