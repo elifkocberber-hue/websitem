@@ -195,7 +195,7 @@ export default function AnalyticsPage() {
                 {/* Grafik alanı */}
                 <div className="ml-8 mr-12">
                   {/* Yatay çizgiler */}
-                  <div className="relative h-56 border-b border-gray-200">
+                  <div className="relative h-56 border-b border-gray-200 overflow-hidden">
                     <div className="absolute w-full h-px bg-gray-100 top-0" />
                     <div className="absolute w-full h-px bg-gray-100 top-1/2" />
                     
@@ -269,7 +269,7 @@ export default function AnalyticsPage() {
               {/* Saatlik Dağılım */}
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Saatlik Dağılım</h2>
-                <div className="flex items-end gap-0.5 h-32">
+                <div className="flex items-end gap-0.5 h-32 overflow-hidden">
                   {Array.from({ length: 24 }, (_, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center group relative">
                       <div
