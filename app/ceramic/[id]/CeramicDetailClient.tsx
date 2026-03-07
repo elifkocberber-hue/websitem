@@ -4,9 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CeramicProduct } from '@/types/ceramic';
 import { CeramicProductCard } from '@/components/CeramicProductCard';
-import { ImageZoom } from '@/components/ImageZoom';
 import { useCart } from '@/context/CeramicCartContext';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface CeramicDetailClientProps {
   product: CeramicProduct;
@@ -26,7 +25,17 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [zoomedImageIndex, setZoomedImageIndex] = useState<number | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageContainerRef.current) return;
+    const rect = imageContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setMousePos({ x, y });
+  };
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
@@ -48,49 +57,41 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
 
       {/* Product Detail */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        {/* Image Section with Zoom */}
+        {/* Image Section with Hover Zoom */}
         <div>
-          {/* Main Image with Zoom */}
+          {/* Main Image */}
           <div className="mb-4">
-            {zoomedImageIndex !== null ? (
-              <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-                <div className="relative w-full max-w-4xl bg-white rounded-lg p-6">
-                  <button
-                    onClick={() => setZoomedImageIndex(null)}
-                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium z-10"
-                  >
-                    Kapat ✕
-                  </button>
-                  <ImageZoom
-                    src={product.images[zoomedImageIndex]}
-                    alt={`${product.name} - Yakınlaştırma`}
-                  />
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setZoomedImageIndex(currentImageIndex)}
-                className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden group cursor-zoom-in"
+            <div
+              ref={imageContainerRef}
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden cursor-zoom-in"
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transform: isHovered ? 'scale(2)' : 'scale(1)',
+                  transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
+                  transition: isHovered ? 'none' : 'transform 0.3s ease',
+                  position: 'relative',
+                }}
               >
                 <Image
                   src={product.images[currentImageIndex]}
                   alt={product.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform"
+                  className="object-cover"
                   priority
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
-                  <div className="bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    Yakınlaştır
-                  </div>
+              </div>
+              {product.handmade && (
+                <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                  El Yapımı
                 </div>
-                {product.handmade && (
-                  <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    El Yapımı
-                  </div>
-                )}
-              </button>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Thumbnail Gallery */}
