@@ -1,16 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 
 interface ImageZoomProps {
   src: string;
   alt: string;
-  width?: number;
-  height?: number;
 }
 
-export const ImageZoom: React.FC<ImageZoomProps> = ({ src, alt, width = 500, height = 500 }) => {
+export const ImageZoom: React.FC<ImageZoomProps> = ({ src, alt }) => {
   const [zoom, setZoom] = useState(100);
   const [isZoomed, setIsZoomed] = useState(false);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -84,24 +82,23 @@ export const ImageZoom: React.FC<ImageZoomProps> = ({ src, alt, width = 500, hei
         onMouseMove={handleMouseMove}
         onWheel={handleWheel}
         className="relative w-full overflow-hidden rounded-lg border-2 border-gray-200 cursor-zoom-in bg-gray-50"
-        style={{
-          maxHeight: '600px',
-          perspective: '1000px',
-        }}
+        style={{ height: '500px' }}
       >
         <div
           style={{
             transform: `scale(${zoom / 100})`,
             transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
             transition: zoom === 100 ? 'transform 0.3s ease' : 'none',
+            width: '100%',
+            height: '100%',
+            position: 'relative',
           }}
-          className="relative w-full h-full"
         >
           <Image
             src={src}
             alt={alt}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
           />
         </div>
