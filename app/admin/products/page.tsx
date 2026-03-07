@@ -69,6 +69,7 @@ export default function ProductsAdminPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -232,6 +233,25 @@ export default function ProductsAdminPage() {
     }
   };
 
+  const handleSeed = async () => {
+    if (!confirm('Yerel koleksiyondaki 23 ürün Supabase\'e aktarılacak. Devam edilsin mi?')) return;
+    setSeeding(true);
+    try {
+      const res = await fetch('/api/admin/seed', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        showMessage('success', data.message);
+        fetchProducts();
+      } else {
+        showMessage('error', data.error || 'Aktarım başarısız');
+      }
+    } catch {
+      showMessage('error', 'Bir hata oluştu');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     router.push('/');
@@ -276,12 +296,24 @@ export default function ProductsAdminPage() {
             {/* Ürün Listesi */}
             <div className="flex justify-between items-center mb-8">
               <p className="text-gray-600">{products.length} ürün</p>
-              <button
-                onClick={handleCreate}
-                className="bg-[#5C0A1A] hover:bg-[#7a1025] text-white font-bold py-3 px-6 rounded-lg transition flex items-center gap-2"
-              >
-                <span className="text-xl">+</span> Yeni Ürün Ekle
-              </button>
+              <div className="flex gap-3">
+                {products.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSeed}
+                    disabled={seeding}
+                    className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-lg transition flex items-center gap-2"
+                  >
+                    {seeding ? 'Aktarılıyor...' : '📥 Koleksiyonu İçe Aktar'}
+                  </button>
+                )}
+                <button
+                  onClick={handleCreate}
+                  className="bg-[#5C0A1A] hover:bg-[#7a1025] text-white font-bold py-3 px-6 rounded-lg transition flex items-center gap-2"
+                >
+                  <span className="text-xl">+</span> Yeni Ürün Ekle
+                </button>
+              </div>
             </div>
 
             {loading ? (
