@@ -1,7 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { CeramicProduct } from '@/types/ceramic';
+import { useUser } from '@/context/UserContext';
+import { ceramicProducts } from '@/data/ceramicProducts';
 
 export interface CartCeramicItem extends CeramicProduct {
   quantity: number;
@@ -22,8 +24,30 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartCeramicItem[]>([]);
   const [mounted, setMounted] = useState(false);
+  const { user } = useUser();
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevUserIdRef = useRef<string | null>(null);
 
-  // Hydration problemi için
+  // Supabase'e debounced sync
+  const syncToSupabase = useCallback((cartItems: CartCeramicItem[], userId: string) => {
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(async () => {
+      try {
+        await fetch('/api/user/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            items: cartItems.map(i => ({ product_id: String(i.id), quantity: i.quantity })),
+          }),
+        });
+      } catch {
+        // localStorage her zaman source of truth — sessizce geç
+      }
+    }, 800);
+  }, []);
+
+  // İlk yükleme: localStorage
   useEffect(() => {
     setMounted(true);
     const savedCart = localStorage.getItem('ceramic-cart');
@@ -36,11 +60,74 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
+  // localStorage sync
   useEffect(() => {
     if (mounted) {
       localStorage.setItem('ceramic-cart', JSON.stringify(items));
     }
   }, [items, mounted]);
+
+  // Kullanıcı giriş yaptığında: Supabase sepetini çek ve birleştir
+  useEffect(() => {
+    if (!mounted) return;
+    if (!user) {
+      prevUserIdRef.current = null;
+      return;
+    }
+    // Aynı kullanıcı tekrar tetiklenmesin
+    if (prevUserIdRef.current === user.id) return;
+    prevUserIdRef.current = user.id;
+
+    const fetchAndMerge = async () => {
+      try {
+        const res = await fetch(`/api/user/cart?userId=${user.id}`);
+        if (!res.ok) return;
+        const { items: remoteItems } = await res.json() as {
+          items: { product_id: string; quantity: number }[];
+        };
+
+        if (!remoteItems?.length) {
+          // Uzak sepet boş → local sepeti Supabase'e yükle
+          setItems(prev => {
+            if (prev.length > 0) syncToSupabase(prev, user.id);
+            return prev;
+          });
+          return;
+        }
+
+        // Local + remote birleştir
+        setItems(prev => {
+          const merged = [...prev];
+          for (const remote of remoteItems) {
+            const localIdx = merged.findIndex(i => String(i.id) === remote.product_id);
+            if (localIdx >= 0) {
+              // Local'de zaten var → local miktarı koru (daha taze)
+            } else {
+              // Sadece remote'da var → ürün datasını local JSON'dan bul
+              const product = ceramicProducts.find(p => String(p.id) === remote.product_id);
+              if (product) {
+                merged.push({ ...product, quantity: remote.quantity });
+              }
+            }
+          }
+          // Birleştirilmiş sepeti Supabase'e kaydet
+          syncToSupabase(merged, user.id);
+          return merged;
+        });
+      } catch {
+        // Hata olursa local sepet korunur
+      }
+    };
+
+    fetchAndMerge();
+  }, [user, mounted, syncToSupabase]);
+
+  // Sepet değişince Supabase'e sync (kullanıcı giriş yapmışsa)
+  useEffect(() => {
+    if (!mounted || !user) return;
+    // İlk merge tetiklemesi dışında sync et
+    syncToSupabase(items, user.id);
+  }, [items, user, mounted, syncToSupabase]);
 
   const addToCart = (product: CeramicProduct, quantity: number) => {
     setItems((prevItems) => {
