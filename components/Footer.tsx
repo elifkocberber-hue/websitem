@@ -14,6 +14,7 @@ export const Footer: React.FC = () => {
         {/* Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-16">
           <div>
+            <p className="text-[11px] tracking-[0.2em] uppercase mb-1 invisible">El&apos;s Dream Factory</p>
             <h4 className="text-[11px] tracking-[0.2em] uppercase text-clay mb-5">Keşfet</h4>
             <ul className="space-y-3">
               <li><Link href="/" className="text-sm text-bone/60 hover:text-bone transition-colors">Ana Sayfa</Link></li>
@@ -22,6 +23,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
+            <p className="text-[11px] tracking-[0.2em] uppercase mb-1 invisible">El&apos;s Dream Factory</p>
             <h4 className="text-[11px] tracking-[0.2em] uppercase text-clay mb-5">Bilgi</h4>
             <ul className="space-y-3">
               <li><Link href="/privacy" className="text-sm text-bone/60 hover:text-bone transition-colors">Gizlilik Politikası</Link></li>
@@ -31,6 +33,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
+            <p className="text-[11px] tracking-[0.2em] uppercase mb-1 invisible">El&apos;s Dream Factory</p>
             <h4 className="text-[11px] tracking-[0.2em] uppercase text-clay mb-5">İletişim</h4>
             <ul className="space-y-3">
               <li><a href="mailto:elsdreamfactory@gmail.com" className="text-sm text-bone/60 hover:text-bone transition-colors">elsdreamfactory@gmail.com</a></li>
