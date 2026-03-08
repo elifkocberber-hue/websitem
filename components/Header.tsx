@@ -218,19 +218,19 @@ export const Header: React.FC = () => {
       {/* Mobile Menu — Full-screen overlay */}
       {menuOpen && (
         <div className="md:hidden fixed inset-0 top-18 bg-bone z-[70] flex flex-col items-center justify-center gap-5 px-6">
-          <Link href="/" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+          <Link href="/" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Ana Sayfa
           </Link>
-          <Link href="/ceramics" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+          <Link href="/ceramics" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Koleksiyon
           </Link>
-          <Link href="/about" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+          <Link href="/about" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Hakkımızda
           </Link>
-          <Link href="/favorites" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+          <Link href="/favorites" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Favoriler{totalFavorites > 0 ? ` (${totalFavorites})` : ''}
           </Link>
-          <Link href="/cart" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+          <Link href="/cart" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Sepet{totalItems > 0 ? ` (${totalItems})` : ''}
           </Link>
           {isAdmin && (
@@ -249,7 +249,7 @@ export const Header: React.FC = () => {
               </button>
             </>
           ) : (
-            <Link href="/login" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+            <Link href="/login" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
               Giriş
             </Link>
           )}
