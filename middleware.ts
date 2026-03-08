@@ -2,11 +2,20 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Admin route koruması — cookie yoksa login sayfasına yönlendir
+  if (pathname.startsWith('/admin')) {
+    const adminToken = request.cookies.get('adminToken')?.value;
+    if (!adminToken) {
+      return NextResponse.redirect(new URL('/sergenim/login', request.url));
+    }
+  }
+
   const response = NextResponse.next();
 
   // CORS Headers - API çağrıları için
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    // Sadece kendi domainimizden gelen istekleri kabul et
+  if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin');
     const allowedOrigins = [
       process.env.NEXT_PUBLIC_APP_URL,
@@ -31,10 +40,18 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
-  // Content Security Policy
+  // Content Security Policy — Meta Pixel dahil
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://sandbox-api.iyzipay.com https://api.iyzipay.com https://zpqtdaoyeokavrkosuii.supabase.co; frame-ancestors 'none';"
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://connect.facebook.net",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: https://www.facebook.com",
+      "font-src 'self' data:",
+      "connect-src 'self' https://sandbox-api.iyzipay.com https://api.iyzipay.com https://zpqtdaoyeokavrkosuii.supabase.co https://graph.facebook.com",
+      "frame-ancestors 'none'",
+    ].join('; ')
   );
 
   // HSTS (HTTPS Strict Transport Security)
