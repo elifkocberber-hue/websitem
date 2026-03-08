@@ -6,7 +6,7 @@ import { CartProvider } from "@/context/CeramicCartContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { AdminProvider } from "@/context/AdminContext";
 import { UserProvider } from "@/context/UserContext";
-import { Header, Footer, ScrollToTop } from "@/components";
+import { Header, Footer, ScrollToTop, MetaPixel } from "@/components";
 
 import { CookieConsent } from "@/components/CookieConsent";
 import { VisitorTracker } from "@/components/VisitorTracker";
@@ -232,6 +232,7 @@ export default function RootLayout({
           <UserProvider>
           <FavoritesProvider>
           <CartProvider>
+            <MetaPixel />
             <CookieConsent />
             <VisitorTracker />
             <div className="flex flex-col min-h-screen">

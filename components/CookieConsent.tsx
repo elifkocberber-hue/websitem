@@ -20,6 +20,8 @@ export const CookieConsent: React.FC = () => {
     }
   }, []);
 
+  const dispatchConsentUpdate = () => window.dispatchEvent(new Event('cookieConsentUpdate'));
+
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'accepted');
     localStorage.setItem('cookie_preferences', JSON.stringify({
@@ -28,6 +30,7 @@ export const CookieConsent: React.FC = () => {
       marketing: true,
     }));
     setVisible(false);
+    dispatchConsentUpdate();
   };
 
   const handleReject = () => {
@@ -38,12 +41,14 @@ export const CookieConsent: React.FC = () => {
       marketing: false,
     }));
     setVisible(false);
+    dispatchConsentUpdate();
   };
 
   const handleSaveSettings = () => {
     localStorage.setItem('cookie_consent', 'custom');
     localStorage.setItem('cookie_preferences', JSON.stringify(preferences));
     setVisible(false);
+    dispatchConsentUpdate();
   };
 
   if (!visible) return null;

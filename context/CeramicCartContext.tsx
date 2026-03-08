@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { CeramicProduct } from '@/types/ceramic';
 import { useUser } from '@/context/UserContext';
 import { ceramicProducts } from '@/data/ceramicProducts';
+import { trackAddToCart } from '@/lib/pixel';
 
 export interface CartCeramicItem extends CeramicProduct {
   quantity: number;
@@ -141,6 +142,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return [...prevItems, { ...product, quantity }];
     });
+    trackAddToCart(product, quantity);
   };
 
   const removeFromCart = (productId: number | string) => {
