@@ -217,7 +217,7 @@ export const Header: React.FC = () => {
 
       {/* Mobile Menu — Full-screen overlay */}
       {menuOpen && (
-        <div className="md:hidden fixed inset-0 top-18 bg-bone z-[70] flex flex-col items-center justify-center gap-5 px-6">
+        <div className="md:hidden fixed inset-0 top-18 bg-bone z-[70] flex flex-col items-center justify-start gap-5 px-6 pt-12">
           <Link href="/" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Ana Sayfa
           </Link>
