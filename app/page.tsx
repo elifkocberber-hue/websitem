@@ -11,15 +11,6 @@ export default async function Home() {
 
   return (
     <>
-      {/* ═══════ YAPIM AŞAMASI BANNER ═══════ */}
-      <div className="w-full bg-amber-50 border-b border-amber-200 py-3 px-4 flex items-center justify-center gap-3 text-center">
-        <span className="text-2xl">🚧</span>
-        <p className="text-amber-800 text-sm font-medium tracking-wide">
-          Yapım Aşamasındayız — Yakında tam anlamıyla hizmetinizdeyiz!
-        </p>
-        <span className="text-2xl">🚧</span>
-      </div>
-
       {/* ═══════ HERO ═══════ */}
       <section className="relative h-screen min-h-150 overflow-hidden">
         {/* Arkaplan görseli tam kaplama */}

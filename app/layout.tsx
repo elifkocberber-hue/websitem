@@ -5,7 +5,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CeramicCartContext";
 import { AdminProvider } from "@/context/AdminContext";
 import { UserProvider } from "@/context/UserContext";
-import { Header, Footer } from "@/components";
+import { Header, Footer, ScrollToTop } from "@/components";
 
 import { CookieConsent } from "@/components/CookieConsent";
 import { VisitorTracker } from "@/components/VisitorTracker";
@@ -238,6 +238,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <ScrollToTop />
             </div>
           </CartProvider>
           </UserProvider>
