@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CeramicProduct } from '@/types/ceramic';
 import { useCart } from '@/context/CeramicCartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import { useState } from 'react';
 
 interface CeramicProductCardProps {
@@ -16,7 +17,9 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({
   imageClass = 'aspect-[4/5]',
 }) => {
   const { addToCart } = useCart();
+  const { toggleFavorite, isFavorited } = useFavorites();
   const [addedToCart, setAddedToCart] = useState(false);
+  const favorited = isFavorited(product.id);
 
   const clayTypeLabels: Record<string, string> = {
     stoneware: 'Stoneware',
@@ -58,6 +61,16 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({
               El Yapımı
             </span>
           )}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); toggleFavorite(product.id); }}
+            className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-white/80 rounded-full backdrop-blur-sm hover:bg-white transition-colors duration-200"
+            aria-label={favorited ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={favorited ? '#DD6B56' : 'none'} stroke={favorited ? '#DD6B56' : 'currentColor'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
         </div>
       </Link>
 

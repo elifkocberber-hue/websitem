@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CeramicCartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import { useUser } from '@/context/UserContext';
 import { useAdmin } from '@/context/AdminContext';
 import { SearchBar } from '@/components/SearchBar';
@@ -10,6 +11,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export const Header: React.FC = () => {
   const { totalItems } = useCart();
+  const { totalFavorites } = useFavorites();
   const { user, logout } = useUser();
   const { isAuthenticated: isAdmin } = useAdmin();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -108,6 +110,22 @@ export const Header: React.FC = () => {
             className="link-line text-[13px] tracking-[0.12em] uppercase text-earth hover:text-charcoal transition-colors"
           >
             Hakkımızda
+          </Link>
+
+          {/* Favorites */}
+          <Link
+            href="/favorites"
+            className="relative flex items-center"
+            aria-label={`Favoriler${totalFavorites > 0 ? ` (${totalFavorites})` : ''}`}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={totalFavorites > 0 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={totalFavorites > 0 ? 'text-accent' : 'text-charcoal'}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            {totalFavorites > 0 && (
+              <span className="absolute -top-2 -right-3 w-5 h-5 bg-accent text-white text-[10px] font-medium flex items-center justify-center rounded-full">
+                {totalFavorites}
+              </span>
+            )}
           </Link>
 
           <Link
@@ -212,6 +230,9 @@ export const Header: React.FC = () => {
           </Link>
           <Link href="/about" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
             Hakkımızda
+          </Link>
+          <Link href="/favorites" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
+            Favoriler{totalFavorites > 0 ? ` (${totalFavorites})` : ''}
           </Link>
           <Link href="/cart" onClick={() => setMenuOpen(false)} className="heading-serif text-3xl text-charcoal hover:text-accent transition-colors">
             Sepet{totalItems > 0 ? ` (${totalItems})` : ''}

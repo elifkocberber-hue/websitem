@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CeramicCartContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import { AdminProvider } from "@/context/AdminContext";
 import { UserProvider } from "@/context/UserContext";
 import { Header, Footer, ScrollToTop } from "@/components";
@@ -229,6 +230,7 @@ export default function RootLayout({
       >
         <AdminProvider>
           <UserProvider>
+          <FavoritesProvider>
           <CartProvider>
             <CookieConsent />
             <VisitorTracker />
@@ -241,6 +243,7 @@ export default function RootLayout({
               <ScrollToTop />
             </div>
           </CartProvider>
+          </FavoritesProvider>
           </UserProvider>
         </AdminProvider>
       </body>
