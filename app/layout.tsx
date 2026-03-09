@@ -102,6 +102,11 @@ export const metadata: Metadata = {
     canonical: "https://elsdreamfactory.com",
   },
 
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
+
   authors: [
     {
       name: "El's Dream Factory",
