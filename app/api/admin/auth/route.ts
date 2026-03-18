@@ -1,40 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rateLimit';
-import { adminSessions } from '@/lib/adminAuth';
+import { signAdminJWT, verifyAdminJWT } from '@/lib/adminAuth';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 
-function generateSessionToken(): string {
-  return crypto.randomBytes(32).toString('hex');
-}
-
+// GET - Oturum kontrolü
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get('adminToken')?.value;
+    if (!token) return NextResponse.json({ authenticated: false }, { status: 401 });
 
-    if (!token || !adminSessions.has(token)) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
-    }
+    const payload = verifyAdminJWT(token);
+    if (!payload) return NextResponse.json({ authenticated: false }, { status: 401 });
 
-    const session = adminSessions.get(token)!;
-
-    if (Date.now() > session.expiresAt) {
-      adminSessions.delete(token);
-      return NextResponse.json({ authenticated: false }, { status: 401 });
-    }
-
-    return NextResponse.json({ authenticated: true, email: session.email });
+    return NextResponse.json({ authenticated: true, email: payload.email });
   } catch {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 }
 
+// POST - Giriş
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: max 5 login attempts per 15 minutes
     const rateLimitKey = getRateLimitKey(request, 'admin-login');
     const { allowed } = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
 
@@ -47,81 +36,50 @@ export async function POST(request: NextRequest) {
 
     const { email, password, rememberMe } = await request.json();
 
-    // Validate input
     if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Geçersiz e-posta veya şifre' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Geçersiz e-posta veya şifre' }, { status: 401 });
     }
 
-    // Validate email
     if (email !== ADMIN_EMAIL) {
-      return NextResponse.json(
-        { success: false, error: 'Geçersiz e-posta veya şifre' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Geçersiz e-posta veya şifre' }, { status: 401 });
     }
 
-    // Compare password with bcrypt
     const isPasswordValid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { success: false, error: 'Geçersiz e-posta veya şifre' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Geçersiz e-posta veya şifre' }, { status: 401 });
     }
 
-    const token = generateSessionToken();
-    const sessionDuration = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 7 gün veya 24 saat
-    const expiresAt = Date.now() + sessionDuration;
+    const cookieMaxAge = rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60;
+    const token = signAdminJWT(email, cookieMaxAge);
 
-    adminSessions.set(token, { email, expiresAt });
-
-    const response = NextResponse.json({
-      success: true,
-      email: email,
-      message: 'Başarıyla giriş yaptınız',
-    });
-
+    const response = NextResponse.json({ success: true, email, message: 'Başarıyla giriş yaptınız' });
     response.cookies.set('adminToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60,
+      maxAge: cookieMaxAge,
     });
 
     return response;
   } catch {
-    return NextResponse.json(
-      { success: false, error: 'Login hatası' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Login hatası' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest) {
+// DELETE - Çıkış
+export async function DELETE(_request: NextRequest) {
   try {
-    const token = request.cookies.get('adminToken')?.value;
-
-    if (token) {
-      adminSessions.delete(token);
-    }
-
     const response = NextResponse.json({ success: true, message: 'Çıkış yapıldı' });
     response.cookies.delete('adminToken');
-
     return response;
   } catch {
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
 
-// Handle CORS preflight requests
+// CORS preflight
 export async function OPTIONS(request: NextRequest) {
   const response = new NextResponse();
-  
   const origin = request.headers.get('origin');
   const allowedOrigins = [
     process.env.NEXT_PUBLIC_APP_URL,
@@ -137,6 +95,5 @@ export async function OPTIONS(request: NextRequest) {
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   response.headers.set('Access-Control-Allow-Credentials', 'true');
   response.headers.set('Access-Control-Max-Age', '86400');
-
   return response;
 }
