@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 const SUPABASE_HOSTNAME = 'zpqtdaoyeokavrkosuii.supabase.co';
 
 export async function GET(request: NextRequest) {
@@ -23,31 +21,44 @@ export async function GET(request: NextRequest) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
-  const fetchHeaders: HeadersInit = {};
   const range = request.headers.get('range');
-  if (range) fetchHeaders['Range'] = range;
+  const upstreamHeaders: HeadersInit = {
+    'Accept': '*/*',
+    'Accept-Encoding': 'identity', // disable compression so content-length is accurate
+  };
+  if (range) upstreamHeaders['Range'] = range;
 
+  let upstream: Response;
   try {
-    const upstream = await fetch(videoUrl, { headers: fetchHeaders });
-
-    const contentType = /\.webm$/i.test(parsed.pathname) ? 'video/webm' : 'video/mp4';
-
-    const resHeaders = new Headers({
-      'Content-Type': contentType,
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'public, max-age=86400',
-    });
-
-    const cr = upstream.headers.get('content-range');
-    const cl = upstream.headers.get('content-length');
-    if (cr) resHeaders.set('Content-Range', cr);
-    if (cl) resHeaders.set('Content-Length', cl);
-
-    return new NextResponse(upstream.body, {
-      status: upstream.status,
-      headers: resHeaders,
-    });
-  } catch {
-    return new NextResponse('Upstream error', { status: 502 });
+    upstream = await fetch(videoUrl, { headers: upstreamHeaders });
+  } catch (err) {
+    return new NextResponse(`Fetch failed: ${String(err)}`, { status: 502 });
   }
+
+  if (!upstream.ok && upstream.status !== 206) {
+    return new NextResponse(`Upstream error: ${upstream.status}`, { status: upstream.status });
+  }
+
+  const upstreamType = upstream.headers.get('content-type') ?? '';
+  const path = parsed.pathname.toLowerCase();
+  const contentType = upstreamType.startsWith('video/')
+    ? upstreamType
+    : /\.webm$/.test(path) ? 'video/webm'
+    : /\.mov$/.test(path) ? 'video/quicktime'
+    : 'video/mp4';
+
+  const resHeaders = new Headers();
+  resHeaders.set('Content-Type', contentType);
+  resHeaders.set('Accept-Ranges', 'bytes');
+  resHeaders.set('Cache-Control', 'public, max-age=86400');
+
+  for (const h of ['content-length', 'content-range', 'etag', 'last-modified']) {
+    const v = upstream.headers.get(h);
+    if (v) resHeaders.set(h, v);
+  }
+
+  return new NextResponse(upstream.body, {
+    status: upstream.status,
+    headers: resHeaders,
+  });
 }
