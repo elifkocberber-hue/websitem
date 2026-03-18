@@ -185,17 +185,6 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           <div className="bg-amber-50 rounded-lg p-6 mb-6 border border-amber-200">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Özellikleri</h3>
             <ul className="space-y-3">
-              {product.dimensions && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">
-                    <strong>Boyutlar:</strong>{' '}
-                    {product.dimensions.height && `Y: ${product.dimensions.height}cm `}
-                    {product.dimensions.width && `G: ${product.dimensions.width}cm `}
-                    {product.dimensions.diameter && `Ç: ${product.dimensions.diameter}cm`}
-                  </span>
-                </li>
-              )}
               {product.dishwasherSafe && (
                 <li className="flex items-start">
                   <span className="text-amber-600 font-bold mr-3">✓</span>

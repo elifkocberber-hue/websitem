@@ -237,6 +237,12 @@ export default function ProductsAdminPage() {
       return;
     }
 
+    // Varyasyon varsa toplam stoğu otomatik hesapla
+    const dataToSave = { ...formData };
+    if (dataToSave.variations?.options?.length) {
+      dataToSave.stock = dataToSave.variations.options.reduce((sum, opt) => sum + (opt.stock || 0), 0);
+    }
+
     setSaving(true);
     try {
       const url = isCreating
@@ -247,7 +253,7 @@ export default function ProductsAdminPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSave),
       });
 
       if (res.ok) {

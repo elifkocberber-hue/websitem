@@ -25,11 +25,17 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
   const [selectedClayType, setSelectedClayType] = useState<string | null>(null);
   const [showHandmadeOnly, setShowHandmadeOnly] = useState(false);
 
-  const categories = Array.from(new Set(products.map(p => p.category)));
+  const categories = Array.from(new Set(
+    products.flatMap(p => (p.categories && p.categories.length > 0) ? p.categories : (p.category ? [p.category] : []))
+  ));
   const clayTypes = Array.from(new Set(products.map(p => p.clayType))) as CeramicProduct['clayType'][];
 
   let filteredProducts = products;
-  if (selectedCategory) filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
+  if (selectedCategory) filteredProducts = filteredProducts.filter(p =>
+    (p.categories && p.categories.length > 0)
+      ? p.categories.includes(selectedCategory)
+      : p.category === selectedCategory
+  );
   if (selectedClayType) filteredProducts = filteredProducts.filter(p => p.clayType === selectedClayType);
   if (showHandmadeOnly) filteredProducts = filteredProducts.filter(p => p.handmade);
 
