@@ -108,7 +108,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                     src={product.images[currentImageIndex]}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     priority
                   />
                 </div>

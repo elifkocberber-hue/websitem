@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useCart } from '@/context/CeramicCartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useUser } from '@/context/UserContext';
-import { useAdmin } from '@/context/AdminContext';
 import { SearchBar } from '@/components/SearchBar';
 import { useState, useEffect, useRef } from 'react';
 
@@ -13,7 +12,6 @@ export const Header: React.FC = () => {
   const { totalItems } = useCart();
   const { totalFavorites } = useFavorites();
   const { user, logout } = useUser();
-  const { isAuthenticated: isAdmin } = useAdmin();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -114,13 +112,6 @@ export const Header: React.FC = () => {
           >
             Koleksiyon
           </Link>
-          <Link
-            href="/about"
-            className="link-line text-[13px] tracking-[0.12em] uppercase text-earth hover:text-charcoal transition-colors"
-          >
-            Hakkımızda
-          </Link>
-
           {/* Favorites */}
           <Link
             href="/favorites"
@@ -154,19 +145,6 @@ export const Header: React.FC = () => {
             )}
           </Link>
 
-          {/* Admin Panel Shortcut */}
-          {isAdmin && (
-            <Link
-              href="/admin/dashboard"
-              className="flex items-center gap-1.5 text-[13px] tracking-[0.08em] uppercase text-accent hover:text-charcoal transition-colors"
-              title="Admin Paneli"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Admin
-            </Link>
-          )}
 
           {/* User Auth */}
           {user ? (
@@ -233,20 +211,12 @@ export const Header: React.FC = () => {
           <Link href="/ceramics" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Koleksiyon
           </Link>
-          <Link href="/about" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
-            Hakkımızda
-          </Link>
           <Link href="/favorites" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Favoriler{totalFavorites > 0 ? ` (${totalFavorites})` : ''}
           </Link>
           <Link href="/cart" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-charcoal hover:text-accent transition-colors">
             Sepet{totalItems > 0 ? ` (${totalItems})` : ''}
           </Link>
-          {isAdmin && (
-            <Link href="/admin/dashboard" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-accent hover:text-charcoal transition-colors">
-              Admin Paneli
-            </Link>
-          )}
           {user ? (
             <>
               <p className="text-earth text-sm">Merhaba, {user.firstName}</p>
