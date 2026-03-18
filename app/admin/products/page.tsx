@@ -182,19 +182,33 @@ export default function ProductsAdminPage() {
     for (const file of Array.from(files)) {
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'video/mp4', 'video/webm', 'video/quicktime'];
       if (!allowed.includes(file.type)) continue;
-      const fd = new FormData();
-      fd.append('file', file);
       try {
-        const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-        if (res.ok) {
-          const data = await res.json();
-          newImages.push(data.url);
-        } else {
-          const err = await res.json();
-          showMessage('error', err.error || 'Resim yüklenemedi');
+        // 1. Sunucudan imzalı yükleme URL'i al
+        const signRes = await fetch('/api/admin/upload/signed-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name, contentType: file.type }),
+        });
+        if (!signRes.ok) {
+          const err = await signRes.json().catch(() => ({}));
+          showMessage('error', err.error || 'URL alınamadı');
+          continue;
         }
+        const { signedUrl, publicUrl } = await signRes.json();
+
+        // 2. Dosyayı doğrudan Supabase'e yükle (Vercel limit yok)
+        const uploadRes = await fetch(signedUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        });
+        if (!uploadRes.ok) {
+          showMessage('error', 'Dosya yüklenemedi');
+          continue;
+        }
+        newImages.push(publicUrl);
       } catch {
-        showMessage('error', 'Resim yüklenirken hata oluştu');
+        showMessage('error', 'Yükleme sırasında hata oluştu');
       }
     }
 
