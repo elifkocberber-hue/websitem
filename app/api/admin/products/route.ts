@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
         microwave: body.microwave ?? false,
         images: body.images || [],
         featured: body.featured ?? false,
+        variations: body.variations ?? null,
         active: true,
       })
       .select()

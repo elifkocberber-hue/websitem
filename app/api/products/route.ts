@@ -63,5 +63,6 @@ function mapProduct(p: Record<string, unknown>) {
     microwave: p.microwave,
     images: p.images || [],
     featured: p.featured,
+    variations: p.variations || null,
   };
 }

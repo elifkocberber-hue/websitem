@@ -6,6 +6,11 @@ import { useAdmin } from '@/context/AdminContext';
 import Link from 'next/link';
 import Image from 'next/image';
 
+interface ProductVariations {
+  typeName: string;
+  options: Array<{ name: string; stock: number }>;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -25,6 +30,7 @@ interface Product {
   active: boolean;
   created_at: string;
   updated_at: string;
+  variations: ProductVariations | null;
 }
 
 const EMPTY_PRODUCT = {
@@ -32,7 +38,7 @@ const EMPTY_PRODUCT = {
   description: '',
   price: 0,
   stock: 0,
-  clayType: 'stoneware' as string,
+  clayType: '',
   category: '',
   handmade: true,
   glaze: '',
@@ -42,20 +48,8 @@ const EMPTY_PRODUCT = {
   microwave: false,
   images: [] as string[],
   featured: false,
+  variations: null as ProductVariations | null,
 };
-
-const CLAY_TYPES = [
-  { value: 'stoneware', label: 'Stoneware' },
-  { value: 'porcelain', label: 'Porselen' },
-  { value: 'earthenware', label: 'Toprak' },
-  { value: 'bone-china', label: 'Bone China' },
-  { value: 'terracotta', label: 'Terracotta' },
-];
-
-const CATEGORIES = [
-  'Çanak & Kase', 'Fincan & Tabak', 'Vazolar', 'Tabaklar', 'Kaplar',
-  'Dekorasyon', 'Mutfak', 'Pişirme Kapları', 'Figürler', 'Saksılar',
-];
 
 export default function ProductsAdminPage() {
   const { isAuthenticated, adminEmail, logout, loading: authLoading } = useAdmin();
@@ -71,6 +65,8 @@ export default function ProductsAdminPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragImageIndex, setDragImageIndex] = useState<number | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -80,7 +76,10 @@ export default function ProductsAdminPage() {
   }, [isAuthenticated, authLoading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) fetchProducts();
+    if (isAuthenticated) {
+      fetchProducts();
+      fetchCategories();
+    }
   }, [isAuthenticated]);
 
   const fetchProducts = async () => {
@@ -95,6 +94,18 @@ export default function ProductsAdminPage() {
       console.error('Fetch error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/admin/categories');
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data.map((c: { name: string }) => c.name));
+      }
+    } catch {
+      // silently fail
     }
   };
 
@@ -121,6 +132,7 @@ export default function ProductsAdminPage() {
       microwave: product.microwave,
       images: product.images || [],
       featured: product.featured,
+      variations: product.variations || null,
     });
   };
 
@@ -146,7 +158,6 @@ export default function ProductsAdminPage() {
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append('file', file);
-
       try {
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
         if (res.ok) {
@@ -200,12 +211,23 @@ export default function ProductsAdminPage() {
     }));
   };
 
-  const handleMoveImage = (index: number, direction: 'up' | 'down') => {
+  // Image drag-to-reorder
+  const handleImageDragStart = (index: number) => {
+    setDragImageIndex(index);
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragImageIndex === null || dragImageIndex === index) return;
     const newImages = [...formData.images];
-    const swapIndex = direction === 'up' ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= newImages.length) return;
-    [newImages[index], newImages[swapIndex]] = [newImages[swapIndex], newImages[index]];
+    const dragged = newImages.splice(dragImageIndex, 1)[0];
+    newImages.splice(index, 0, dragged);
     setFormData(prev => ({ ...prev, images: newImages }));
+    setDragImageIndex(index);
+  };
+
+  const handleImageDragEnd = () => {
+    setDragImageIndex(null);
   };
 
   const handleSave = async () => {
@@ -214,14 +236,14 @@ export default function ProductsAdminPage() {
       return;
     }
     if (formData.price <= 0) {
-      showMessage('error', 'Fiyat 0\'dan büyük olmalıdır');
+      showMessage('error', "Fiyat 0'dan büyük olmalıdır");
       return;
     }
 
     setSaving(true);
     try {
-      const url = isCreating 
-        ? '/api/admin/products' 
+      const url = isCreating
+        ? '/api/admin/products'
         : `/api/admin/products/${editingProduct?.id}`;
       const method = isCreating ? 'POST' : 'PUT';
 
@@ -262,7 +284,7 @@ export default function ProductsAdminPage() {
   };
 
   const handleSeed = async () => {
-    if (!confirm('Yerel koleksiyondaki 23 ürün Supabase\'e aktarılacak. Devam edilsin mi?')) return;
+    if (!confirm("Yerel koleksiyondaki 23 ürün Supabase'e aktarılacak. Devam edilsin mi?")) return;
     setSeeding(true);
     try {
       const res = await fetch('/api/admin/seed', { method: 'POST' });
@@ -285,6 +307,50 @@ export default function ProductsAdminPage() {
     router.push('/');
   };
 
+  // Variation handlers
+  const addVariations = () => {
+    setFormData(prev => ({
+      ...prev,
+      variations: { typeName: '', options: [{ name: '', stock: 0 }] },
+    }));
+  };
+
+  const removeVariations = () => {
+    setFormData(prev => ({ ...prev, variations: null }));
+  };
+
+  const addVariationOption = () => {
+    setFormData(prev => ({
+      ...prev,
+      variations: prev.variations
+        ? { ...prev.variations, options: [...prev.variations.options, { name: '', stock: 0 }] }
+        : null,
+    }));
+  };
+
+  const removeVariationOption = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      variations: prev.variations
+        ? { ...prev.variations, options: prev.variations.options.filter((_, i) => i !== index) }
+        : null,
+    }));
+  };
+
+  const updateVariationOption = (index: number, field: 'name' | 'stock', value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      variations: prev.variations
+        ? {
+            ...prev.variations,
+            options: prev.variations.options.map((opt, i) =>
+              i === index ? { ...opt, [field]: value } : opt
+            ),
+          }
+        : null,
+    }));
+  };
+
   if (authLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -305,8 +371,15 @@ export default function ProductsAdminPage() {
             <p className="text-gray-600 mt-1">{adminEmail}</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/admin/dashboard" className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition">← Dashboard</Link>
-            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">Çıkış Yap</button>
+            <Link href="/admin/categories" className="bg-amber-100 hover:bg-amber-200 text-amber-800 font-medium py-2 px-4 rounded-lg transition">
+              🏷️ Kategoriler
+            </Link>
+            <Link href="/admin/dashboard" className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition">
+              ← Dashboard
+            </Link>
+            <button type="button" onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
+              Çıkış Yap
+            </button>
           </div>
         </div>
       </header>
@@ -336,6 +409,7 @@ export default function ProductsAdminPage() {
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={handleCreate}
                   className="bg-[#5C0A1A] hover:bg-[#7a1025] text-white font-bold py-3 px-6 rounded-lg transition flex items-center gap-2"
                 >
@@ -349,7 +423,7 @@ export default function ProductsAdminPage() {
             ) : products.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-lg shadow">
                 <p className="text-gray-500 text-lg mb-4">Henüz ürün eklenmemiş</p>
-                <button onClick={handleCreate} className="bg-[#DD6B56] hover:bg-[#C45540] text-white font-bold py-3 px-6 rounded-lg transition">
+                <button type="button" onClick={handleCreate} className="bg-[#DD6B56] hover:bg-[#C45540] text-white font-bold py-3 px-6 rounded-lg transition">
                   İlk Ürününü Ekle
                 </button>
               </div>
@@ -357,7 +431,6 @@ export default function ProductsAdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
                   <div key={product.id} className="bg-white rounded-lg shadow overflow-hidden group">
-                    {/* Resim */}
                     <div className="relative aspect-square bg-gray-100">
                       {product.images?.[0] ? (
                         <Image
@@ -388,7 +461,6 @@ export default function ProductsAdminPage() {
                         {product.images?.length || 0} resim
                       </span>
                     </div>
-                    {/* Bilgi */}
                     <div className="p-4">
                       <h3 className="font-bold text-gray-900 mb-1 truncate">{product.name}</h3>
                       <p className="text-sm text-gray-500 mb-2 line-clamp-2">{product.description}</p>
@@ -398,6 +470,7 @@ export default function ProductsAdminPage() {
                       </div>
                       <div className="flex gap-2">
                         <button
+                          type="button"
                           onClick={() => handleEdit(product)}
                           className="flex-1 bg-[#5C0A1A] hover:bg-[#7a1025] text-white py-2 rounded-lg text-sm font-medium transition"
                         >
@@ -405,11 +478,11 @@ export default function ProductsAdminPage() {
                         </button>
                         {deleteConfirm === product.id ? (
                           <div className="flex gap-1">
-                            <button onClick={() => handleDelete(product.id)} className="bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm transition">Evet</button>
-                            <button onClick={() => setDeleteConfirm(null)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-3 rounded-lg text-sm transition">İptal</button>
+                            <button type="button" onClick={() => handleDelete(product.id)} className="bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg text-sm transition">Evet</button>
+                            <button type="button" onClick={() => setDeleteConfirm(null)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-3 rounded-lg text-sm transition">İptal</button>
                           </div>
                         ) : (
-                          <button onClick={() => setDeleteConfirm(product.id)} className="bg-red-100 hover:bg-red-200 text-red-700 py-2 px-4 rounded-lg text-sm font-medium transition">
+                          <button type="button" onClick={() => setDeleteConfirm(product.id)} className="bg-red-100 hover:bg-red-200 text-red-700 py-2 px-4 rounded-lg text-sm font-medium transition">
                             🗑️
                           </button>
                         )}
@@ -427,7 +500,7 @@ export default function ProductsAdminPage() {
               <h2 className="text-2xl font-bold text-gray-900">
                 {isCreating ? '➕ Yeni Ürün Ekle' : `✏️ ${editingProduct?.name}`}
               </h2>
-              <button onClick={handleCancel} className="text-gray-500 hover:text-gray-800 transition">
+              <button type="button" onClick={handleCancel} className="text-gray-500 hover:text-gray-800 transition">
                 ✕ Kapat
               </button>
             </div>
@@ -435,22 +508,33 @@ export default function ProductsAdminPage() {
             <div className="space-y-8">
               {/* Resimler */}
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">📷 Ürün Resimleri</h3>
-                
-                {/* Mevcut resimler */}
+                <h3 className="text-lg font-bold text-gray-900 mb-1">📷 Ürün Resimleri</h3>
+                <p className="text-sm text-gray-500 mb-4">Görselleri sürükleyerek sıralarını değiştirebilirsiniz. İlk görsel ana resim olarak kullanılır.</p>
+
+                {/* Resim grid - sürükle & bırak ile sıralama */}
                 {formData.images.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     {formData.images.map((img, i) => (
-                      <div key={i} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
-                        <Image src={img} alt={`Ürün resmi ${i + 1}`} fill className="object-cover" sizes="200px" />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-                          {i > 0 && (
-                            <button onClick={() => handleMoveImage(i, 'up')} className="bg-white text-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-gray-100" title="Sola taşı">←</button>
-                          )}
-                          <button onClick={() => handleRemoveImage(i)} className="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-red-700" title="Sil">✕</button>
-                          {i < formData.images.length - 1 && (
-                            <button onClick={() => handleMoveImage(i, 'down')} className="bg-white text-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-gray-100" title="Sağa taşı">→</button>
-                          )}
+                      <div
+                        key={img + i}
+                        draggable
+                        onDragStart={() => handleImageDragStart(i)}
+                        onDragOver={(e) => handleImageDragOver(e, i)}
+                        onDragEnd={handleImageDragEnd}
+                        className={`relative aspect-square bg-gray-100 rounded-lg overflow-hidden group cursor-grab active:cursor-grabbing select-none ${
+                          dragImageIndex === i ? 'opacity-50 ring-2 ring-[#DD6B56]' : ''
+                        }`}
+                      >
+                        <Image src={img} alt={`Ürün resmi ${i + 1}`} fill className="object-cover pointer-events-none" sizes="200px" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(i)}
+                            className="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm hover:bg-red-700"
+                            title="Sil"
+                          >
+                            ✕
+                          </button>
                         </div>
                         {i === 0 && (
                           <span className="absolute bottom-1 left-1 bg-[#5C0A1A] text-white text-[10px] px-2 py-0.5 rounded">Ana Resim</span>
@@ -463,9 +547,7 @@ export default function ProductsAdminPage() {
                 {/* Yükleme alanı */}
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    isDragging
-                      ? 'border-[#DD6B56] bg-[#DD6B56]/5'
-                      : 'border-gray-300 hover:border-[#DD6B56]'
+                    isDragging ? 'border-[#DD6B56] bg-[#DD6B56]/5' : 'border-gray-300 hover:border-[#DD6B56]'
                   }`}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -556,23 +638,20 @@ export default function ProductsAdminPage() {
                       title="Kategori seçin"
                     >
                       <option value="">Seçiniz</option>
-                      {CATEGORIES.map(cat => (
+                      {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Malzeme</label>
-                    <select
+                    <input
+                      type="text"
                       value={formData.clayType}
                       onChange={(e) => setFormData(prev => ({ ...prev, clayType: e.target.value }))}
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#DD6B56] focus:border-transparent outline-none"
-                      title="Malzeme seçin"
-                    >
-                      {CLAY_TYPES.map(ct => (
-                        <option key={ct.value} value={ct.value}>{ct.label}</option>
-                      ))}
-                    </select>
+                      placeholder="Örn: Stoneware, Porselen, Terracotta..."
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Sır (Glaze)</label>
@@ -603,7 +682,9 @@ export default function ProductsAdminPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {['diameter', 'height', 'width', 'depth'].map(dim => (
                       <div key={dim}>
-                        <label className="text-xs text-gray-500 capitalize">{dim === 'diameter' ? 'Çap' : dim === 'height' ? 'Yükseklik' : dim === 'width' ? 'Genişlik' : 'Derinlik'}</label>
+                        <label className="text-xs text-gray-500">
+                          {dim === 'diameter' ? 'Çap' : dim === 'height' ? 'Yükseklik' : dim === 'width' ? 'Genişlik' : 'Derinlik'}
+                        </label>
                         <input
                           type="number"
                           min="0"
@@ -612,7 +693,9 @@ export default function ProductsAdminPage() {
                             const val = parseFloat(e.target.value);
                             setFormData(prev => ({
                               ...prev,
-                              dimensions: val ? { ...prev.dimensions, [dim]: val } : (() => { const d = { ...prev.dimensions }; delete d[dim]; return d; })(),
+                              dimensions: val
+                                ? { ...prev.dimensions, [dim]: val }
+                                : (() => { const d = { ...prev.dimensions }; delete d[dim]; return d; })(),
                             }));
                           }}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#DD6B56] focus:border-transparent outline-none"
@@ -644,9 +727,98 @@ export default function ProductsAdminPage() {
                 </div>
               </div>
 
+              {/* Varyasyonlar */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">🎨 Varyasyonlar</h3>
+                  {!formData.variations ? (
+                    <button
+                      type="button"
+                      onClick={addVariations}
+                      className="bg-[#DD6B56] hover:bg-[#C45540] text-white text-sm font-medium py-2 px-4 rounded-lg transition"
+                    >
+                      + Varyasyon Ekle
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={removeVariations}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium transition"
+                    >
+                      Varyasyonları Kaldır
+                    </button>
+                  )}
+                </div>
+
+                {formData.variations ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Varyasyon Türü Adı</label>
+                      <input
+                        type="text"
+                        value={formData.variations.typeName}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          variations: prev.variations ? { ...prev.variations, typeName: e.target.value } : null,
+                        }))}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#DD6B56] focus:border-transparent outline-none"
+                        placeholder="Örn: Renk, Boyut, Model..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Seçenekler</label>
+                      <div className="space-y-2">
+                        {formData.variations.options.map((opt, i) => (
+                          <div key={i} className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              value={opt.name}
+                              onChange={(e) => updateVariationOption(i, 'name', e.target.value)}
+                              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#DD6B56] focus:border-transparent outline-none"
+                              placeholder="Seçenek adı (Örn: Mavi, Küçük...)"
+                            />
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs text-gray-500 whitespace-nowrap">Stok:</span>
+                              <input
+                                type="number"
+                                min="0"
+                                value={opt.stock}
+                                onChange={(e) => updateVariationOption(i, 'stock', parseInt(e.target.value) || 0)}
+                                className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#DD6B56] focus:border-transparent outline-none"
+                                title="Stok adedi"
+                              />
+                            </div>
+                            {formData.variations!.options.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeVariationOption(i)}
+                                className="text-red-500 hover:text-red-700 w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 transition flex-shrink-0"
+                                title="Seçeneği sil"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addVariationOption}
+                        className="mt-3 text-[#DD6B56] hover:text-[#C45540] text-sm font-medium transition"
+                      >
+                        + Seçenek Ekle
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm">Renk, boyut gibi farklı seçenekler için varyasyon ekleyebilirsiniz.</p>
+                )}
+              </div>
+
               {/* Kaydet Butonları */}
               <div className="flex gap-4">
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={saving}
                   className="flex-1 bg-[#5C0A1A] hover:bg-[#7a1025] disabled:opacity-50 text-white font-bold py-3 px-6 rounded-lg transition text-lg"
@@ -654,6 +826,7 @@ export default function ProductsAdminPage() {
                   {saving ? 'Kaydediliyor...' : isCreating ? '✅ Ürünü Ekle' : '💾 Değişiklikleri Kaydet'}
                 </button>
                 <button
+                  type="button"
                   onClick={handleCancel}
                   className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition"
                 >

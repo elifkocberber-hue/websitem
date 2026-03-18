@@ -153,6 +153,12 @@ export default function AdminDashboardPage() {
             🛍️ Ürün Yönetimi
           </Link>
           <Link
+            href="/admin/categories"
+            className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-5 rounded-lg transition"
+          >
+            🏷️ Kategori Yönetimi
+          </Link>
+          <Link
             href="/admin/analytics"
             className="inline-flex items-center gap-2 bg-[#5C0A1A] hover:bg-[#DD6B56] text-white font-medium py-2 px-5 rounded-lg transition"
           >

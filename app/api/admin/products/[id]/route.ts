@@ -53,6 +53,7 @@ export async function PUT(
     if (body.images !== undefined) updateData.images = body.images;
     if (body.featured !== undefined) updateData.featured = body.featured;
     if (body.active !== undefined) updateData.active = body.active;
+    if ('variations' in body) updateData.variations = body.variations;
     updateData.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase

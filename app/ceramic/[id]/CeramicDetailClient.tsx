@@ -13,14 +13,6 @@ interface CeramicDetailClientProps {
   relatedProducts: CeramicProduct[];
 }
 
-const clayTypeLabels: Record<string, string> = {
-  stoneware: 'Stoneware',
-  porcelain: 'Porselen',
-  earthenware: 'Toprak Çanak',
-  'bone-china': 'Kemik Porseleni',
-  terracotta: 'Terracotta',
-};
-
 export default function CeramicDetailClient({ product, relatedProducts }: CeramicDetailClientProps) {
   const { addToCart } = useCart();
 
@@ -34,6 +26,9 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
   const [addedToCart, setAddedToCart] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [selectedVariation, setSelectedVariation] = useState<number | null>(
+    product.variations ? 0 : null
+  );
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -43,6 +38,12 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setMousePos({ x, y });
   };
+
+  // Seçili varyasyonun stoğu veya ürün stoğu
+  const availableStock =
+    product.variations && selectedVariation !== null
+      ? product.variations.options[selectedVariation].stock
+      : product.stock;
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
@@ -132,17 +133,13 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
         {/* Product Info */}
         <div>
           <div className="mb-4">
-            <span className="inline-block bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-medium mb-2">
+            <span className="inline-block bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-medium">
               {product.category}
-            </span>
-            <span className="inline-block ml-2 bg-amber-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-              {clayTypeLabels[product.clayType]}
             </span>
           </div>
 
           <h1 className="text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
 
-          {/* Rating - placeholder */}
           <div className="flex items-center gap-4 mb-6">
             <span className="text-4xl font-bold text-amber-600">₺{product.price}</span>
           </div>
@@ -152,32 +149,37 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
             {product.description}
           </p>
 
+          {/* Variations */}
+          {product.variations && product.variations.options.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">{product.variations.typeName}</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.variations.options.map((opt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => { setSelectedVariation(i); setQuantity(1); }}
+                    disabled={opt.stock === 0}
+                    className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                      selectedVariation === i
+                        ? 'border-amber-600 bg-amber-600 text-white'
+                        : opt.stock === 0
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed line-through'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-amber-400'
+                    }`}
+                  >
+                    {opt.name}
+                    {opt.stock === 0 && ' (Tükendi)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Features */}
           <div className="bg-amber-50 rounded-lg p-6 mb-6 border border-amber-200">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Özellikleri</h3>
             <ul className="space-y-3">
-              <li className="flex items-start">
-                <span className="text-amber-600 font-bold mr-3">✓</span>
-                <span className="text-gray-700">
-                  <strong>Çamur Tipi:</strong> {clayTypeLabels[product.clayType]}
-                </span>
-              </li>
-              {product.glaze && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">
-                    <strong>Cilası:</strong> {product.glaze}
-                  </span>
-                </li>
-              )}
-              {product.weight && (
-                <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
-                  <span className="text-gray-700">
-                    <strong>Ağırlık:</strong> {product.weight}g
-                  </span>
-                </li>
-              )}
               {product.dimensions && (
                 <li className="flex items-start">
                   <span className="text-amber-600 font-bold mr-3">✓</span>
@@ -212,8 +214,8 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
 
           {/* Stock Status */}
           <div className="mb-8">
-            {product.stock > 0 ? (
-              <p className="text-green-600 font-semibold text-lg">✓ Stokta Var ({product.stock} adet)</p>
+            {availableStock > 0 ? (
+              <p className="text-green-600 font-semibold text-lg">✓ Stokta Var ({availableStock} adet)</p>
             ) : (
               <p className="text-red-600 font-semibold text-lg">✗ Stokta Yok</p>
             )}
@@ -231,18 +233,18 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
               <input
                 type="number"
                 min="1"
-                max={product.stock}
+                max={availableStock}
                 value={quantity}
                 onChange={(e) => {
                   const val = parseInt(e.target.value) || 1;
-                  setQuantity(Math.min(product.stock, Math.max(1, val)));
+                  setQuantity(Math.min(availableStock, Math.max(1, val)));
                 }}
                 className="w-16 text-center border-l border-r border-gray-300 py-2 focus:outline-none"
                 title="Ürün adedi"
                 aria-label="Ürün adedi"
               />
               <button
-                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
                 className="px-4 py-3 hover:bg-gray-100 transition-colors"
               >
                 +
@@ -250,11 +252,11 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
             </div>
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0}
+              disabled={availableStock === 0}
               className={`flex-1 font-bold py-3 px-6 rounded-lg transition-colors text-white ${
                 addedToCart
                   ? 'bg-green-600'
-                  : product.stock === 0
+                  : availableStock === 0
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-amber-600 hover:bg-amber-700'
               }`}

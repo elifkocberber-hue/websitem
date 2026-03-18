@@ -1,10 +1,15 @@
+export interface ProductVariations {
+  typeName: string;
+  options: Array<{ name: string; stock: number }>;
+}
+
 export interface CeramicProduct {
   id: number | string;
   name: string;
   description: string;
   price: number;
   stock: number;
-  clayType: 'stoneware' | 'porcelain' | 'earthenware' | 'bone-china' | 'terracotta';
+  clayType: string;
   images: string[];
   category: string;
   dimensions?: {
@@ -19,6 +24,7 @@ export interface CeramicProduct {
   dishwasherSafe?: boolean;
   microwave?: boolean;
   featured?: boolean;
+  variations?: ProductVariations | null;
 }
 
 export interface CeramicImage {
