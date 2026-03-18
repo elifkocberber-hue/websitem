@@ -70,6 +70,7 @@ export default function ProductsAdminPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -163,6 +164,33 @@ export default function ProductsAdminPage() {
     setFormData(prev => ({ ...prev, images: newImages }));
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDropFiles = async (files: FileList) => {
+    if (!files.length) return;
+    setUploading(true);
+    const newImages = [...formData.images];
+
+    for (const file of Array.from(files)) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) continue;
+      const fd = new FormData();
+      fd.append('file', file);
+      try {
+        const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+        if (res.ok) {
+          const data = await res.json();
+          newImages.push(data.url);
+        } else {
+          const err = await res.json();
+          showMessage('error', err.error || 'Resim yüklenemedi');
+        }
+      } catch {
+        showMessage('error', 'Resim yüklenirken hata oluştu');
+      }
+    }
+
+    setFormData(prev => ({ ...prev, images: newImages }));
+    setUploading(false);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -432,8 +460,21 @@ export default function ProductsAdminPage() {
                   </div>
                 )}
 
-                {/* Yükleme butonu */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#DD6B56] transition-colors">
+                {/* Yükleme alanı */}
+                <div
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    isDragging
+                      ? 'border-[#DD6B56] bg-[#DD6B56]/5'
+                      : 'border-gray-300 hover:border-[#DD6B56]'
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    if (e.dataTransfer.files.length) handleDropFiles(e.dataTransfer.files);
+                  }}
+                >
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -448,8 +489,10 @@ export default function ProductsAdminPage() {
                       <div className="text-[#DD6B56] font-medium">Yükleniyor...</div>
                     ) : (
                       <>
-                        <div className="text-4xl mb-2">📤</div>
-                        <p className="text-gray-600 font-medium">Resim yüklemek için tıklayın</p>
+                        <div className="text-4xl mb-2">{isDragging ? '📂' : '📤'}</div>
+                        <p className="text-gray-600 font-medium">
+                          {isDragging ? 'Bırakın, yüklensin!' : 'Sürükle bırak veya tıklayarak seçin'}
+                        </p>
                         <p className="text-gray-400 text-sm mt-1">JPEG, PNG, WebP — Maks. 5MB</p>
                       </>
                     )}
