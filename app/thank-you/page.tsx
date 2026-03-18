@@ -39,7 +39,7 @@ function ThankYouContent() {
               </svg>
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Ödemeniz Başarılı! 🎉</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Ödemeniz Başarılı!</h1>
           <p className="text-lg text-gray-600">
             Siparişiniz alındı ve işleme başlandı. Kargo bilgilerinizi e-posta adresinize göndereceğiz.
           </p>

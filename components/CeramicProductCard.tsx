@@ -10,11 +10,13 @@ import { useState } from 'react';
 interface CeramicProductCardProps {
   product: CeramicProduct;
   imageClass?: string;
+  objectFit?: 'cover' | 'contain';
 }
 
 export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({
   product,
   imageClass = 'aspect-[4/5]',
+  objectFit = 'cover',
 }) => {
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorited } = useFavorites();
@@ -46,7 +48,7 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover img-primary"
+            className={`${objectFit === 'contain' ? 'object-contain' : 'object-cover'} img-primary`}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           {product.images.length > 1 && (

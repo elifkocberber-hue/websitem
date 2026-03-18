@@ -68,7 +68,7 @@ function PaymentFailedContent() {
               {getErrorIcon()}
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Ödeme Başarısız ❌</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Ödeme Başarısız</h1>
           <p className="text-lg text-gray-600">
             Maalesef ödeme işlemi tamamlanamadı. Lütfen aşağıdaki bilgileri okuyun.
           </p>

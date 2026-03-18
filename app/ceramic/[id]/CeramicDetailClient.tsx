@@ -110,7 +110,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                 </div>
               )}
               {product.handmade && (
-                <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                <div className="absolute top-3 right-3 bg-charcoal text-bone px-3 py-1 rounded-full text-sm font-bold z-10">
                   El Yapımı
                 </div>
               )}
@@ -124,8 +124,8 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                 key={idx}
                 onClick={() => setCurrentImageIndex(idx)}
                 title={`Görüntü ${idx + 1}`}
-                className={`relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border-3 transition-all hover:border-amber-400 ${
-                  idx === currentImageIndex ? 'border-amber-600 scale-105' : 'border-gray-300'
+                className={`relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border-3 transition-all hover:border-accent ${
+                  idx === currentImageIndex ? 'border-charcoal scale-105' : 'border-gray-300'
                 }`}
               >
                 {/\.(mp4|webm|mov)$/i.test(image) ? (
@@ -155,7 +155,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
               ? product.categories
               : product.category ? [product.category] : []
             ).map(cat => (
-              <span key={cat} className="inline-block bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+              <span key={cat} className="inline-block bg-charcoal text-bone px-4 py-1 rounded-full text-sm font-medium">
                 {cat}
               </span>
             ))}
@@ -164,11 +164,11 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           <h1 className="text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
 
           <div className="flex items-center gap-4 mb-6">
-            <span className="text-4xl font-bold text-amber-600">₺{product.price}</span>
+            <span className="text-4xl font-bold text-charcoal">₺{product.price}</span>
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 text-lg mb-6 leading-relaxed">
+          <p className="text-gray-700 text-lg mb-6 leading-relaxed whitespace-pre-line">
             {product.description}
           </p>
 
@@ -185,10 +185,10 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                     disabled={opt.stock === 0}
                     className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                       selectedVariation === i
-                        ? 'border-amber-600 bg-amber-600 text-white'
+                        ? 'border-charcoal bg-charcoal text-bone'
                         : opt.stock === 0
                         ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed line-through'
-                        : 'border-gray-300 bg-white text-gray-700 hover:border-amber-400'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-accent'
                     }`}
                   >
                     {opt.name}
@@ -200,24 +200,24 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           )}
 
           {/* Features */}
-          <div className="bg-amber-50 rounded-lg p-6 mb-6 border border-amber-200">
+          <div className="bg-[#5C0A1A]/8 rounded-lg p-6 mb-6 border border-[#5C0A1A]/20">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Özellikleri</h3>
             <ul className="space-y-3">
               {product.dishwasherSafe && (
                 <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
+                  <span className="text-charcoal font-bold mr-3">✓</span>
                   <span className="text-gray-700">Bulaşık makinesinde güvenli</span>
                 </li>
               )}
               {product.microwave && (
                 <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
+                  <span className="text-charcoal font-bold mr-3">✓</span>
                   <span className="text-gray-700">Mikrodalgada güvenli</span>
                 </li>
               )}
               {product.handmade && (
                 <li className="flex items-start">
-                  <span className="text-amber-600 font-bold mr-3">✓</span>
+                  <span className="text-charcoal font-bold mr-3">✓</span>
                   <span className="text-gray-700">El yapımı, benzersiz tasarım</span>
                 </li>
               )}
@@ -265,12 +265,12 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
             <button
               onClick={handleAddToCart}
               disabled={availableStock === 0}
-              className={`flex-1 font-bold py-3 px-6 rounded-lg transition-colors text-white ${
+              className={`flex-1 font-bold py-3 px-6 rounded-lg transition-colors text-bone ${
                 addedToCart
                   ? 'bg-green-600'
                   : availableStock === 0
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-amber-600 hover:bg-amber-700'
+                  : 'bg-charcoal hover:bg-accent'
               }`}
             >
               {addedToCart ? '✓ Sepete Eklendi' : 'Sepete Ekle'}
@@ -280,9 +280,9 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           {/* Back Link */}
           <Link
             href="/ceramics"
-            className="block text-center text-amber-600 hover:text-amber-800 font-medium"
+            className="block text-center text-charcoal hover:text-accent font-medium transition-colors"
           >
-            ← Seramik ürünlerine dön
+            ← Ürünlere dön
           </Link>
         </div>
       </div>

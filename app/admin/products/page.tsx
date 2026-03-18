@@ -473,7 +473,7 @@ export default function ProductsAdminPage() {
                         </div>
                       )}
                       {product.featured && (
-                        <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">⭐ ÖNE ÇIKAN</span>
+                        <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">ÖNE ÇIKAN</span>
                       )}
                       <span className="absolute top-2 right-2 bg-white/90 text-xs px-2 py-1 rounded text-gray-700">
                         {product.images?.length || 0} resim
@@ -731,10 +731,10 @@ export default function ProductsAdminPage() {
                 {/* Checkbox'lar */}
                 <div className="mt-6 flex flex-wrap gap-6">
                   {[
-                    { key: 'handmade', label: '🤲 El Yapımı' },
-                    { key: 'dishwasherSafe', label: '🫧 Bulaşık Makinesine Uygun' },
-                    { key: 'microwave', label: '📡 Mikrodalgaya Uygun' },
-                    { key: 'featured', label: '⭐ Öne Çıkan Ürün' },
+                    { key: 'handmade', label: 'El Yapımı' },
+                    { key: 'dishwasherSafe', label: 'Bulaşık Makinesine Uygun' },
+                    { key: 'microwave', label: 'Mikrodalgaya Uygun' },
+                    { key: 'featured', label: 'Öne Çıkan Ürün' },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -845,7 +845,7 @@ export default function ProductsAdminPage() {
                   disabled={saving}
                   className="flex-1 bg-[#5C0A1A] hover:bg-[#7a1025] disabled:opacity-50 text-white font-bold py-3 px-6 rounded-lg transition text-lg"
                 >
-                  {saving ? 'Kaydediliyor...' : isCreating ? '✅ Ürünü Ekle' : '💾 Değişiklikleri Kaydet'}
+                  {saving ? 'Kaydediliyor...' : isCreating ? 'Ürünü Ekle' : 'Değişiklikleri Kaydet'}
                 </button>
                 <button
                   type="button"

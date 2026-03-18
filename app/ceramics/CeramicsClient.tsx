@@ -150,6 +150,7 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
                     <CeramicProductCard
                       product={product}
                       imageClass={imageClasses[i % imageClasses.length]}
+                      objectFit="contain"
                     />
                   </ScrollReveal>
                 </div>

@@ -18,6 +18,7 @@ export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(1200);
   const logoRef = useRef<HTMLAnchorElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -29,8 +30,14 @@ export const Header: React.FC = () => {
       const progress = Math.min(y / 300, 1);
       setScrollProgress(progress);
     };
+    const onResize = () => setWindowWidth(window.innerWidth);
+    setWindowWidth(window.innerWidth);
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
   // Close menus on click outside
@@ -44,11 +51,13 @@ export const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Dar ekranlarda (768-1200px) logoyu sola kaydır, başlıkları kapatmasın
+  const viewportShift = Math.max(0, Math.min(1, (1200 - windowWidth) / 400));
+  const effectiveProgress = Math.max(scrollProgress, viewportShift);
+
   // Logo boyutu: 144px → 48px (küçülme)
-  const logoSize = 144 - scrollProgress * 96;
-  // Logo pozisyonu: ortadan (left 50%) → sola (left 40px)
-  const logoLeft = `calc(50% - ${scrollProgress * (50)}vw + ${scrollProgress * 40}px + ${scrollProgress * logoSize / 2}px)`;
-  const logoTop = scrollProgress * 12; // biraz aşağı kayar header içine oturması için
+  const logoSize = 144 - effectiveProgress * 96;
+  const logoTop = effectiveProgress * 12;
 
   return (
     <>
@@ -58,7 +67,7 @@ export const Header: React.FC = () => {
         href="/"
         className={`fixed z-60 transition-none${menuOpen ? ' hidden' : ''}`}
         style={{
-          left: `calc(50% - ${scrollProgress * 50}% + ${scrollProgress * (24 + logoSize / 2)}px)`,
+          left: `calc(50% - ${effectiveProgress * 50}% + ${effectiveProgress * (24 + logoSize / 2)}px)`,
           top: `${logoTop}px`,
           transform: 'translateX(-50%)',
         }}
@@ -235,7 +244,7 @@ export const Header: React.FC = () => {
           </Link>
           {isAdmin && (
             <Link href="/admin/dashboard" onClick={() => setMenuOpen(false)} className="heading-serif text-2xl text-accent hover:text-charcoal transition-colors">
-              🔐 Admin Paneli
+              Admin Paneli
             </Link>
           )}
           {user ? (

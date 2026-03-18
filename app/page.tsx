@@ -119,48 +119,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ═══════ ABOUT SECTION (dark) ═══════ */}
-      <section className="relative py-24 md:py-32 overflow-hidden bg-charcoal">
-        <div className="absolute inset-y-0 right-0 w-full md:w-[55%]">
-          <Image
-            src="/images/arkaplan.jpg"
-            alt="Arka plan"
-            fill
-            className="object-contain object-right opacity-20"
-          />
-        </div>
-        <div className="absolute inset-0 bg-charcoal/60" />
-        <div className="relative z-10 max-w-350 mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          <ScrollReveal direction="left">
-            <p className="text-xs tracking-[0.2em] uppercase text-clay mb-4">Hakkımızda</p>
-            <h2 className="heading-display text-3xl md:text-4xl text-bone mb-6">
-              Üç Kuşağın Mirası
-            </h2>
-            <p className="text-bone/60 leading-relaxed mb-4">
-              1994&apos;ten bu yana seramik geleneğini yaşatıyoruz.
-              Her ürünümüz, ustalarımızın ellerinde şekillenen benzersiz bir sanat eseri.
-            </p>
-            <p className="text-bone/60 leading-relaxed mb-8">
-              Doğal topraklar, geleneksel teknikler ve modern tasarım anlayışımız
-              ile yaşam alanlarınıza sanat katıyoruz.
-            </p>
-            <Link href="/about" className="link-line text-sm tracking-wider uppercase text-accent hover:text-bone transition-colors">
-              Hikayemiz
-            </Link>
-          </ScrollReveal>
-          <ScrollReveal direction="right">
-            <div className="relative h-100 md:h-130">
-              <Image
-                src="https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=800&q=80"
-              alt="El yapımı seramik atölyesi - seramik üretim süreci"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
       {/* ═══════ PHILOSOPHY ═══════ */}
       <section className="max-w-350 mx-auto px-6 md:px-10 py-20 md:py-32">
         <ScrollReveal>
@@ -223,6 +181,48 @@ export default async function Home() {
             <NewsletterForm />
           </div>
         </ScrollReveal>
+      </section>
+
+      {/* ═══════ ABOUT SECTION (dark) ═══════ */}
+      <section className="relative py-24 md:py-32 overflow-hidden bg-charcoal">
+        <div className="absolute inset-y-0 right-0 w-full md:w-[55%]">
+          <Image
+            src="/images/arkaplan.jpg"
+            alt="Arka plan"
+            fill
+            className="object-contain object-right opacity-20"
+          />
+        </div>
+        <div className="absolute inset-0 bg-charcoal/60" />
+        <div className="relative z-10 max-w-350 mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+          <ScrollReveal direction="left">
+            <p className="text-xs tracking-[0.2em] uppercase text-clay mb-4">Hakkımızda</p>
+            <h2 className="heading-display text-3xl md:text-4xl text-bone mb-6">
+              Üç Kuşağın Mirası
+            </h2>
+            <p className="text-bone/60 leading-relaxed mb-4">
+              1994&apos;ten bu yana seramik geleneğini yaşatıyoruz.
+              Her ürünümüz, ustalarımızın ellerinde şekillenen benzersiz bir sanat eseri.
+            </p>
+            <p className="text-bone/60 leading-relaxed mb-8">
+              Doğal topraklar, geleneksel teknikler ve modern tasarım anlayışımız
+              ile yaşam alanlarınıza sanat katıyoruz.
+            </p>
+            <Link href="/about" className="link-line text-sm tracking-wider uppercase text-accent hover:text-bone transition-colors">
+              Hikayemiz
+            </Link>
+          </ScrollReveal>
+          <ScrollReveal direction="right">
+            <div className="relative h-100 md:h-130">
+              <Image
+                src="https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=800&q=80"
+                alt="El yapımı seramik atölyesi - seramik üretim süreci"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </ScrollReveal>
+        </div>
       </section>
     </>
   );

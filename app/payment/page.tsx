@@ -117,7 +117,7 @@ export default function PaymentPage() {
           <span>Ödeme</span>
         </nav>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">🔐 Güvenli Ödeme</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Güvenli Ödeme</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Payment Form */}
