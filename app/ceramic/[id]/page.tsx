@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { fetchProducts, fetchProductById, getCeramicProductById, ceramicProducts } from '@/data/ceramicProducts';
 import CeramicDetailClient from './CeramicDetailClient';
 
-export const revalidate = 3600; // 1 saatte bir yeniden render — fiyat güncellemeleri yansısın
+export const revalidate = 60; // 60 saniyede bir yeniden render
 
 interface PageProps {
   params: Promise<{ id: string }>;

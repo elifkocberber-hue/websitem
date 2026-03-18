@@ -122,7 +122,7 @@ export default function ProductsAdminPage() {
       price: product.price,
       stock: product.stock,
       clayType: product.clay_type,
-      categories: product.categories || (product.category ? [product.category] : []),
+      categories: (product.categories?.length > 0) ? product.categories : (product.category ? [product.category] : []),
       handmade: product.handmade,
       dimensions: product.dimensions || {},
       dishwasherSafe: product.dishwasher_safe,

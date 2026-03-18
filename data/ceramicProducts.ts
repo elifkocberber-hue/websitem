@@ -29,6 +29,7 @@ export async function fetchProducts(): Promise<CeramicProduct[]> {
       stock: p.stock,
       clayType: p.clay_type,
       category: p.category,
+      categories: (p.categories as string[]) || [],
       handmade: p.handmade,
       glaze: p.glaze,
       dimensions: (p.dimensions as Record<string, number>) || {},
@@ -37,6 +38,7 @@ export async function fetchProducts(): Promise<CeramicProduct[]> {
       microwave: p.microwave,
       images: (p.images as string[]) || [],
       featured: p.featured,
+      variations: p.variations || null,
     })) as CeramicProduct[];
   } catch {
     return ceramicProducts;
@@ -73,6 +75,7 @@ export async function fetchProductById(id: string): Promise<CeramicProduct | und
       stock: p.stock,
       clayType: p.clay_type,
       category: p.category,
+      categories: (p.categories as string[]) || [],
       handmade: p.handmade,
       glaze: p.glaze,
       dimensions: (p.dimensions as Record<string, number>) || {},
@@ -81,6 +84,7 @@ export async function fetchProductById(id: string): Promise<CeramicProduct | und
       microwave: p.microwave,
       images: (p.images as string[]) || [],
       featured: p.featured,
+      variations: p.variations || null,
     } as CeramicProduct;
   } catch {
     return getCeramicProductById(id);
