@@ -28,6 +28,232 @@ interface AnalyticsData {
     duration: number;
     created_at: string;
   }[];
+  botVisits: number;
+  botTopCountries: { country: string; count: number }[];
+  botTopPages: { page: string; count: number }[];
+  botTopUAs: { ua: string; count: number }[];
+  botRecentVisitors: {
+    id: string;
+    page: string;
+    device: string;
+    browser: string;
+    os: string;
+    country: string;
+    city: string;
+    user_agent: string;
+    created_at: string;
+  }[];
+}
+
+function DailyChart({ dailyTrend }: { dailyTrend: { date: string; count: number; avgDuration: number }[] }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  const W = 800, H = 220;
+  const pL = 38, pR = 52, pT = 12, pB = 28;
+  const cW = W - pL - pR;
+  const cH = H - pT - pB;
+
+  const maxCount = Math.max(...dailyTrend.map(d => d.count), 1);
+  const maxDur = Math.max(...dailyTrend.map(d => d.avgDuration), 1);
+  const n = dailyTrend.length || 1;
+  const step = cW / n;
+  const bW = step * 0.55;
+
+  const bx = (i: number) => pL + i * step + (step - bW) / 2;
+  const by = (c: number) => pT + cH - (c / maxCount) * cH;
+  const bh = (c: number) => Math.max((c / maxCount) * cH, 1);
+  const lx = (i: number) => pL + i * step + step / 2;
+  const ly = (d: number) => pT + cH - (d / maxDur) * cH;
+
+  const linePoints = dailyTrend.map((d, i) => `${lx(i)},${ly(d.avgDuration)}`).join(' ');
+
+  const yLabels = [0, 0.5, 1];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 220 }}>
+      {/* Grid */}
+      {yLabels.map(pct => (
+        <line key={pct} x1={pL} y1={pT + cH * (1 - pct)} x2={W - pR} y2={pT + cH * (1 - pct)}
+          stroke="#f3f4f6" strokeWidth="1" />
+      ))}
+
+      {/* Y sol (ziyaret) */}
+      {yLabels.map(pct => (
+        <text key={pct} x={pL - 5} y={pT + cH * (1 - pct) + 4}
+          textAnchor="end" fontSize="10" fill="#9ca3af">
+          {Math.round(maxCount * pct)}
+        </text>
+      ))}
+
+      {/* Y sağ (süre) */}
+      {yLabels.map(pct => (
+        <text key={pct} x={W - pR + 5} y={pT + cH * (1 - pct) + 4}
+          textAnchor="start" fontSize="10" fill="#5C0A1A" opacity="0.5">
+          {formatDuration(Math.round(maxDur * pct))}
+        </text>
+      ))}
+
+      {/* Barlar */}
+      {dailyTrend.map((d, i) => (
+        <rect key={d.date}
+          x={bx(i)} y={by(d.count)} width={bW} height={bh(d.count)}
+          fill={hovered === i ? '#DD6B56' : '#DD6B5680'} rx="3"
+          style={{ cursor: 'pointer', transition: 'fill 0.15s' }}
+          onMouseEnter={() => setHovered(i)}
+          onMouseLeave={() => setHovered(null)}
+        />
+      ))}
+
+      {/* Süre çizgisi */}
+      {dailyTrend.length > 1 && (
+        <polyline points={linePoints} fill="none"
+          stroke="#5C0A1A" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" opacity="0.65" />
+      )}
+
+      {/* Süre noktaları */}
+      {dailyTrend.map((d, i) => (
+        <circle key={d.date}
+          cx={lx(i)} cy={ly(d.avgDuration)} r={hovered === i ? 5 : 3.5}
+          fill="#5C0A1A" stroke="white" strokeWidth="2"
+          style={{ cursor: 'pointer' }}
+          onMouseEnter={() => setHovered(i)}
+          onMouseLeave={() => setHovered(null)}
+        />
+      ))}
+
+      {/* X ekseni etiketleri */}
+      {dailyTrend.map((d, i) => {
+        const show = n <= 14 || i % Math.ceil(n / 14) === 0;
+        if (!show) return null;
+        return (
+          <text key={d.date} x={lx(i)} y={H - 4}
+            textAnchor="middle" fontSize="10" fill="#9ca3af">
+            {new Date(d.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+          </text>
+        );
+      })}
+
+      {/* Tooltip */}
+      {hovered !== null && (() => {
+        const d = dailyTrend[hovered];
+        const tx = lx(hovered);
+        const tw = 130, th = 46;
+        const tooltipX = Math.min(Math.max(tx - tw / 2, pL), W - pR - tw);
+        const tooltipY = Math.max(Math.min(by(d.count), ly(d.avgDuration)) - th - 8, pT);
+        return (
+          <g pointerEvents="none">
+            <rect x={tooltipX} y={tooltipY} width={tw} height={th} rx="6" fill="#1f2937" />
+            <text x={tooltipX + tw / 2} y={tooltipY + 15} textAnchor="middle" fontSize="11" fill="white" fontWeight="600">
+              {new Date(d.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+            </text>
+            <text x={tooltipX + 10} y={tooltipY + 33} fontSize="10" fill="#DD6B56">{d.count} ziyaret</text>
+            <text x={tooltipX + 75} y={tooltipY + 33} fontSize="10" fill="#D4A0A0">{formatDuration(d.avgDuration)}</text>
+          </g>
+        );
+      })()}
+    </svg>
+  );
+}
+
+function BotSection({ data }: { data: AnalyticsData }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-10 border border-gray-200 rounded-lg overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-bold text-gray-700">Bot Ziyaretleri</span>
+          <span className="bg-gray-200 text-gray-600 text-sm font-medium px-3 py-0.5 rounded-full">
+            {data.botVisits} istek
+          </span>
+        </div>
+        <span className="text-gray-400 text-lg">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="p-6 bg-white space-y-8">
+          {/* Özet */}
+          <p className="text-sm text-gray-500">
+            Bunlar arama motoru tarayıcıları, önizleme botları ve otomatik isteklerdir. Ana istatistiklere dahil edilmemiştir.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Ülkeler */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-700 mb-3">Ülke</h3>
+              <div className="space-y-2">
+                {data.botTopCountries.map(({ country, count }) => (
+                  <div key={country} className="flex justify-between text-sm">
+                    <span className="text-gray-600">{country}</span>
+                    <span className="font-medium text-gray-800">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sayfalar */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-700 mb-3">En Çok Taranan Sayfalar</h3>
+              <div className="space-y-2">
+                {data.botTopPages.map(({ page, count }) => (
+                  <div key={page} className="flex justify-between text-sm">
+                    <span className="text-gray-600 truncate mr-4">{page}</span>
+                    <span className="font-medium text-gray-800 shrink-0">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* User Agent'lar */}
+          <div>
+            <h3 className="text-sm font-bold text-gray-700 mb-3">User Agent</h3>
+            <div className="space-y-2">
+              {data.botTopUAs.map(({ ua, count }) => (
+                <div key={ua} className="flex justify-between text-sm gap-4">
+                  <span className="text-gray-500 truncate font-mono text-xs">{ua}</span>
+                  <span className="font-medium text-gray-800 shrink-0">{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Son bot istekleri */}
+          <div>
+            <h3 className="text-sm font-bold text-gray-700 mb-3">Son Bot İstekleri</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b text-xs text-gray-500 uppercase">
+                    <th className="pb-2 text-left pr-4">Sayfa</th>
+                    <th className="pb-2 text-left pr-4">Ülke</th>
+                    <th className="pb-2 text-left pr-4">User Agent</th>
+                    <th className="pb-2 text-left">Tarih</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {data.botRecentVisitors.map((v) => (
+                    <tr key={v.id} className="hover:bg-gray-50">
+                      <td className="py-2 pr-4 text-gray-700">{v.page}</td>
+                      <td className="py-2 pr-4 text-gray-500">{v.country}</td>
+                      <td className="py-2 pr-4 text-gray-400 font-mono text-xs max-w-xs truncate">{v.user_agent}</td>
+                      <td className="py-2 text-gray-500 whitespace-nowrap">
+                        {new Date(v.created_at).toLocaleString('tr-TR')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function formatDuration(seconds: number): string {
@@ -86,8 +312,6 @@ export default function AnalyticsPage() {
     );
   }
 
-  const maxDaily = data ? Math.max(...data.dailyTrend.map(d => d.count), 1) : 1;
-  const maxDailyDuration = data ? Math.max(...data.dailyTrend.map(d => d.avgDuration), 1) : 1;
   const maxHourly = data ? Math.max(...Object.values(data.hourlyStats), 1) : 1;
 
   return (
@@ -168,101 +392,18 @@ export default function AnalyticsPage() {
 
             {/* Ziyaretçi Sayısı + Kalma Süresi Grafiği */}
             <div className="bg-white rounded-lg shadow p-6 mb-10">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-900">Ziyaretçi Sayısı & Kalma Süresi</h2>
-                <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded-sm bg-[#DD6B56] inline-block" /> Ziyaret
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-sm bg-[#5C0A1A] inline-block" /> Ort. Süre
+                    <span className="w-3 h-3 rounded-full bg-[#5C0A1A] inline-block" /> Ort. Süre
                   </span>
                 </div>
               </div>
-              <div className="relative">
-                {/* Y ekseni etiketleri - sol (ziyaret) */}
-                <div className="absolute left-0 top-0 h-56 flex flex-col justify-between text-xs text-gray-400 -ml-1">
-                  <span>{maxDaily}</span>
-                  <span>{Math.round(maxDaily / 2)}</span>
-                  <span>0</span>
-                </div>
-                {/* Y ekseni etiketleri - sağ (süre) */}
-                <div className="absolute right-0 top-0 h-56 flex flex-col justify-between text-xs text-[#5C0A1A]/60 -mr-1">
-                  <span>{formatDuration(maxDailyDuration)}</span>
-                  <span>{formatDuration(Math.round(maxDailyDuration / 2))}</span>
-                  <span>0</span>
-                </div>
-                {/* Grafik alanı */}
-                <div className="ml-8 mr-12">
-                  {/* Yatay çizgiler */}
-                  <div className="relative h-56 border-b border-gray-200 overflow-hidden">
-                    <div className="absolute w-full h-px bg-gray-100 top-0" />
-                    <div className="absolute w-full h-px bg-gray-100 top-1/2" />
-                    
-                    {/* Barlar ve çizgi grafiği */}
-                    <div className="flex items-end gap-1 h-full">
-                      {data.dailyTrend.map((d, i) => {
-                        const barHeight = (d.count / maxDaily) * 100;
-                        const dotBottom = maxDailyDuration > 0 ? (d.avgDuration / maxDailyDuration) * 100 : 0;
-                        return (
-                          <div key={d.date} className="flex-1 relative group h-full flex items-end">
-                            {/* Ziyaret barı */}
-                            <div
-                              className="w-full bg-[#DD6B56]/80 rounded-t hover:bg-[#DD6B56] transition-colors min-h-0.5"
-                              style={{ height: `${barHeight}%` }}
-                            />
-                            {/* Süre noktası */}
-                            <div
-                              className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#5C0A1A] border-2 border-white shadow-sm z-10"
-                              style={{ bottom: `${dotBottom}%` }}
-                            />
-                            {/* Çizgi (sonraki noktaya) */}
-                            {i < data.dailyTrend.length - 1 && (() => {
-                              const nextDot = maxDailyDuration > 0 ? (data.dailyTrend[i + 1].avgDuration / maxDailyDuration) * 100 : 0;
-                              const currentDot = dotBottom;
-                              const rise = nextDot - currentDot;
-                              const barWidth = 100; // yüzde
-                              const angle = Math.atan2((-rise * 2.24) / 100, 1) * (180 / Math.PI);
-                              const length = Math.sqrt(1 + Math.pow((rise * 2.24) / 100, 2)) * 100;
-                              return (
-                                <div
-                                  className="absolute z-5 h-0.5 bg-[#5C0A1A]/50 origin-left"
-                                  style={{
-                                    bottom: `${currentDot}%`,
-                                    left: '50%',
-                                    width: `${length}%`,
-                                    transform: `rotate(${angle}deg)`,
-                                  }}
-                                />
-                              );
-                            })()}
-                            {/* Tooltip */}
-                            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 whitespace-nowrap">
-                              <div className="font-semibold">{new Date(d.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}</div>
-                              <div className="flex gap-3 mt-1">
-                                <span className="text-[#DD6B56]">🧑 {d.count} ziyaret</span>
-                                <span className="text-[#D57C68]">⏱ {formatDuration(d.avgDuration)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  {/* Tarih etiketleri */}
-                  <div className="flex gap-1 mt-2">
-                    {data.dailyTrend.map((d, i) => (
-                      <div key={d.date} className="flex-1 text-center">
-                        {(data.dailyTrend.length <= 14 || i % Math.ceil(data.dailyTrend.length / 14) === 0) && (
-                          <span className="text-[10px] text-gray-400">
-                            {new Date(d.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <DailyChart dailyTrend={data.dailyTrend} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
@@ -406,6 +547,9 @@ export default function AnalyticsPage() {
                 </table>
               </div>
             </div>
+
+            {/* ── Bot Ziyaretleri ── */}
+            <BotSection data={data} />
           </>
         ) : (
           <p className="text-gray-600 text-center py-20">Veri bulunamadı</p>
