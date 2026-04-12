@@ -18,7 +18,7 @@ export default function FaqPage() {
   const [submitMsg, setSubmitMsg] = useState('');
 
   useEffect(() => {
-    fetch('/api/faq')
+    fetch('/api/faq', { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => Array.isArray(data) && setFaqs(data))
       .catch(() => {});
