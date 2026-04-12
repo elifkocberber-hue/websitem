@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache';
 import { fetchProducts } from '@/data/ceramicProducts';
 import { supabase } from '@/lib/supabase';
 import HomeClient from './HomeClient';
@@ -10,6 +11,7 @@ const DEFAULT_BANNER = {
 };
 
 async function fetchBannerSettings() {
+  noStore();
   try {
     const { data } = await supabase
       .from('banner_settings')
