@@ -10,6 +10,7 @@ import { Header, Footer, ScrollToTop, MetaPixel } from "@/components";
 
 import { CookieConsent } from "@/components/CookieConsent";
 import { VisitorTracker } from "@/components/VisitorTracker";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -103,8 +104,11 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/favicon.ico',
+    shortcut: '/favicon.ico',
   },
 
   authors: [
@@ -233,6 +237,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${playfair.variable} antialiased`}
       >
+        <LanguageProvider>
         <AdminProvider>
           <UserProvider>
           <FavoritesProvider>
@@ -252,6 +257,7 @@ export default function RootLayout({
           </FavoritesProvider>
           </UserProvider>
         </AdminProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

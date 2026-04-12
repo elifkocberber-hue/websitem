@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export const NewsletterForm: React.FC = () => {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -28,7 +30,6 @@ export const NewsletterForm: React.FC = () => {
       setStatus('error');
     }
 
-    // Reset status after 3 seconds
     setTimeout(() => setStatus('idle'), 3000);
   };
 
@@ -38,7 +39,7 @@ export const NewsletterForm: React.FC = () => {
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="E-posta adresiniz"
+        placeholder={t.newsletter.placeholder}
         required
         className="flex-1 px-5 py-3 bg-transparent border border-charcoal/20 text-sm text-charcoal placeholder:text-clay focus:outline-none focus:border-accent transition-colors"
       />
@@ -47,13 +48,13 @@ export const NewsletterForm: React.FC = () => {
         disabled={status === 'loading'}
         className="bg-charcoal text-bone px-6 py-3 text-sm tracking-wider uppercase hover:bg-accent transition-colors duration-300 disabled:opacity-50"
       >
-        {status === 'loading' ? '...' : status === 'success' ? '✓' : 'Abone'}
+        {status === 'loading' ? '...' : status === 'success' ? '✓' : t.newsletter.subscribe}
       </button>
       {status === 'success' && (
-        <p className="absolute mt-14 text-xs text-green-600">Teşekkürler! Abone oldunuz.</p>
+        <p className="absolute mt-14 text-xs text-green-600">{t.newsletter.success}</p>
       )}
       {status === 'error' && (
-        <p className="absolute mt-14 text-xs text-red-600">Bir hata oluştu. Tekrar deneyin.</p>
+        <p className="absolute mt-14 text-xs text-red-600">{t.newsletter.error}</p>
       )}
     </form>
   );

@@ -164,6 +164,18 @@ export default function AdminDashboardPage() {
           >
             📊 Ziyaretçi Analizi
           </Link>
+          <Link
+            href="/admin/banner"
+            className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-medium py-2 px-5 rounded-lg transition"
+          >
+            📢 Bant & Kampanya
+          </Link>
+          <Link
+            href="/admin/faq"
+            className="inline-flex items-center gap-2 bg-indigo-700 hover:bg-indigo-800 text-white font-medium py-2 px-5 rounded-lg transition"
+          >
+            💬 SSS Yönetimi
+          </Link>
         </div>
 
         {/* Stats Cards */}
@@ -194,6 +206,7 @@ export default function AdminDashboardPage() {
         <div className="mb-6 flex gap-4">
           {['all', 'pending', 'confirmed', 'shipped', 'delivered'].map((status) => (
             <button
+              type="button"
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-4 py-2 rounded-lg font-medium transition ${

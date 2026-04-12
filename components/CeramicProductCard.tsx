@@ -60,11 +60,6 @@ export const CeramicProductCard: React.FC<CeramicProductCardProps> = ({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           )}
-          {product.handmade && (
-            <span className="absolute top-4 left-4 bg-charcoal text-bone text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 z-10">
-              El Yapımı
-            </span>
-          )}
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); toggleFavorite(product.id); }}

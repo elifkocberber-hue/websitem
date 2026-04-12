@@ -5,13 +5,14 @@ import { CeramicProductCard } from '@/components/CeramicProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
-const clayTypeLabels: Record<string, string> = {
-  stoneware: 'Stoneware',
-  porcelain: 'Porselen',
-  earthenware: 'Toprak',
-  'bone-china': 'Bone China',
-  terracotta: 'Terracotta',
+const clayTypeLabels: Record<string, { tr: string; en: string }> = {
+  stoneware:   { tr: 'Stoneware',  en: 'Stoneware' },
+  porcelain:   { tr: 'Porselen',   en: 'Porcelain' },
+  earthenware: { tr: 'Toprak',     en: 'Earthenware' },
+  'bone-china':{ tr: 'Bone China', en: 'Bone China' },
+  terracotta:  { tr: 'Terracotta', en: 'Terracotta' },
 };
 
 const imageClasses = ['aspect-[4/5]', 'aspect-[3/4]', 'aspect-square', 'aspect-[5/6]', 'aspect-[4/5]'];
@@ -21,6 +22,7 @@ interface CeramicsClientProps {
 }
 
 export default function CeramicsClient({ products }: CeramicsClientProps) {
+  const { t, language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedClayType, setSelectedClayType] = useState<string | null>(null);
   const [showHandmadeOnly, setShowHandmadeOnly] = useState(false);
@@ -41,20 +43,21 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
 
   const hasActiveFilters = selectedCategory || selectedClayType || showHandmadeOnly;
 
+  const getClayLabel = (ct: string) =>
+    clayTypeLabels[ct]?.[language] ?? ct;
+
   return (
     <div className="max-w-350 mx-auto px-6 md:px-10 py-12 md:py-20">
       {/* Header */}
       <ScrollReveal>
         <div className="mb-12 md:mb-16">
           <div className="flex items-center gap-2 text-xs tracking-[0.15em] uppercase text-earth mb-4">
-            <Link href="/" className="hover:text-charcoal transition-colors">Ana Sayfa</Link>
+            <Link href="/" className="hover:text-charcoal transition-colors">{t.ceramics.breadcrumb_home}</Link>
             <span>/</span>
-            <span className="text-charcoal">Koleksiyon</span>
+            <span className="text-charcoal">{t.ceramics.breadcrumb_collection}</span>
           </div>
-          <h1 className="heading-display text-4xl md:text-5xl text-charcoal">Koleksiyon</h1>
-          <p className="text-earth mt-4 max-w-xl leading-relaxed">
-            Geleneksel seramik sanatının en güzel örnekleri — her biri benzersiz ve el yapımı.
-          </p>
+          <h1 className="heading-display text-4xl md:text-5xl text-charcoal">{t.ceramics.title}</h1>
+          <p className="text-earth mt-4 max-w-xl leading-relaxed">{t.ceramics.subtitle}</p>
         </div>
       </ScrollReveal>
 
@@ -79,21 +82,23 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
                   </svg>
                 )}
               </div>
-              <span className="text-sm text-charcoal">Sadece El Yapımı</span>
+              <span className="text-sm text-charcoal">{t.ceramics.handmade_only}</span>
             </label>
 
             {/* Category */}
             <div>
-              <h3 className="text-[11px] tracking-[0.15em] uppercase text-earth mb-4">Kategori</h3>
+              <h3 className="text-[11px] tracking-[0.15em] uppercase text-earth mb-4">{t.ceramics.category_label}</h3>
               <div className="space-y-2">
                 <button
+                  type="button"
                   onClick={() => setSelectedCategory(null)}
                   className={`block text-sm transition-colors ${!selectedCategory ? 'text-charcoal font-medium' : 'text-earth hover:text-charcoal'}`}
                 >
-                  Tümü
+                  {t.ceramics.all}
                 </button>
                 {categories.map(cat => (
                   <button
+                    type="button"
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
                     className={`block text-sm transition-colors ${selectedCategory === cat ? 'text-charcoal font-medium' : 'text-earth hover:text-charcoal'}`}
@@ -106,21 +111,23 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
 
             {/* Clay Type */}
             <div>
-              <h3 className="text-[11px] tracking-[0.15em] uppercase text-earth mb-4">Malzeme</h3>
+              <h3 className="text-[11px] tracking-[0.15em] uppercase text-earth mb-4">{t.ceramics.material_label}</h3>
               <div className="space-y-2">
                 <button
+                  type="button"
                   onClick={() => setSelectedClayType(null)}
                   className={`block text-sm transition-colors ${!selectedClayType ? 'text-charcoal font-medium' : 'text-earth hover:text-charcoal'}`}
                 >
-                  Tümü
+                  {t.ceramics.all}
                 </button>
                 {clayTypes.map(ct => (
                   <button
+                    type="button"
                     key={ct}
                     onClick={() => setSelectedClayType(ct)}
                     className={`block text-sm transition-colors ${selectedClayType === ct ? 'text-charcoal font-medium' : 'text-earth hover:text-charcoal'}`}
                   >
-                    {clayTypeLabels[ct]}
+                    {getClayLabel(ct)}
                   </button>
                 ))}
               </div>
@@ -129,10 +136,11 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
             {/* Clear filters */}
             {hasActiveFilters && (
               <button
+                type="button"
                 onClick={() => { setSelectedCategory(null); setSelectedClayType(null); setShowHandmadeOnly(false); }}
                 className="text-sm text-accent hover:text-charcoal transition-colors"
               >
-                Filtreleri Temizle
+                {t.ceramics.clear_filters}
               </button>
             )}
           </div>
@@ -140,7 +148,7 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
 
         {/* Products */}
         <div>
-          <p className="text-sm text-earth mb-8">{filteredProducts.length} ürün</p>
+          <p className="text-sm text-earth mb-8">{filteredProducts.length} {t.ceramics.product_count}</p>
 
           {filteredProducts.length > 0 ? (
             <div className="columns-1 md:columns-2 gap-x-8">
@@ -158,12 +166,13 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
             </div>
           ) : (
             <div className="text-center py-20">
-              <p className="heading-serif text-xl text-charcoal mb-4">Ürün bulunamadı</p>
+              <p className="heading-serif text-xl text-charcoal mb-4">{t.ceramics.no_products}</p>
               <button
+                type="button"
                 onClick={() => { setSelectedCategory(null); setSelectedClayType(null); setShowHandmadeOnly(false); }}
                 className="text-sm text-accent hover:text-charcoal transition-colors"
               >
-                Filtreleri Temizle
+                {t.ceramics.clear_filters}
               </button>
             </div>
           )}

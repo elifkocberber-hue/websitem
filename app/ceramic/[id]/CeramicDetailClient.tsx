@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CeramicProduct } from '@/types/ceramic';
 import { CeramicProductCard } from '@/components/CeramicProductCard';
 import { useCart } from '@/context/CeramicCartContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
 import { trackViewContent } from '@/lib/pixel';
 
@@ -15,6 +16,7 @@ interface CeramicDetailClientProps {
 
 export default function CeramicDetailClient({ product, relatedProducts }: CeramicDetailClientProps) {
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   useEffect(() => {
     trackViewContent(product);
@@ -39,7 +41,6 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
     setMousePos({ x, y });
   };
 
-  // Seçili varyasyonun stoğu veya ürün stoğu
   const availableStock =
     product.variations && selectedVariation !== null
       ? product.variations.options[selectedVariation].stock
@@ -56,18 +57,17 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
     <div className="max-w-350 mx-auto px-6 md:px-10 py-12">
       {/* Breadcrumb */}
       <div className="mb-8 text-sm text-earth">
-        <Link href="/" className="hover:text-amber-600">Ana Sayfa</Link>
+        <Link href="/" className="hover:text-amber-600">{t.product.breadcrumb_home}</Link>
         <span className="mx-2">›</span>
-        <Link href="/ceramics" className="hover:text-amber-600">Seramik Ürünleri</Link>
+        <Link href="/ceramics" className="hover:text-amber-600">{t.product.breadcrumb_collection}</Link>
         <span className="mx-2">›</span>
         <span className="text-gray-900">{product.name}</span>
       </div>
 
       {/* Product Detail */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        {/* Image Section with Hover Zoom */}
+        {/* Image Section */}
         <div>
-          {/* Main Image */}
           <div className="mb-4">
             <div
               ref={imageContainerRef}
@@ -85,33 +85,22 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                     playsInline
                   />
                 ) : (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    transform: isHovered ? 'scale(2)' : 'scale(1)',
-                    transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
-                    transition: isHovered ? 'none' : 'transform 0.3s ease',
-                    position: 'relative',
-                  }}
-                >
-                  <Image
-                    src={product.images[currentImageIndex]}
-                    alt={product.name}
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
+                  <div
+                    className={`image-zoom-inner${isHovered ? ' is-hovered' : ''}`}
+                    style={{ '--zoom-x': `${mousePos.x}%`, '--zoom-y': `${mousePos.y}%` } as React.CSSProperties}
+                  >
+                    <Image
+                      src={product.images[currentImageIndex]}
+                      alt={product.name}
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
                 )
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <span className="text-sm">Görsel bulunmuyor</span>
-                </div>
-              )}
-              {product.handmade && (
-                <div className="absolute top-3 right-3 bg-charcoal text-bone px-3 py-1 rounded-full text-sm font-bold z-10">
-                  El Yapımı
+                  <span className="text-sm">{t.product.no_image}</span>
                 </div>
               )}
             </div>
@@ -121,9 +110,10 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           <div className="flex gap-2 overflow-x-auto pb-2">
             {product.images.map((image, idx) => (
               <button
+                type="button"
                 key={idx}
                 onClick={() => setCurrentImageIndex(idx)}
-                title={`Görüntü ${idx + 1}`}
+                title={`${t.product.image_thumb} ${idx + 1}`}
                 className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all hover:border-accent ${
                   idx === currentImageIndex ? 'border-charcoal scale-105' : 'border-gray-300'
                 }`}
@@ -138,7 +128,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                 ) : (
                   <Image
                     src={image}
-                    alt={`${product.name} - Görüntü ${idx + 1}`}
+                    alt={`${product.name} - ${t.product.image_thumb} ${idx + 1}`}
                     fill
                     className="object-contain"
                   />
@@ -167,7 +157,6 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
             <span className="text-4xl font-bold text-charcoal">₺{product.price}</span>
           </div>
 
-          {/* Description */}
           <p className="text-gray-700 text-lg mb-6 leading-relaxed whitespace-pre-line">
             {product.description}
           </p>
@@ -179,8 +168,8 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
               <div className="flex flex-wrap gap-2">
                 {product.variations.options.map((opt, i) => (
                   <button
-                    key={i}
                     type="button"
+                    key={i}
                     onClick={() => { setSelectedVariation(i); setQuantity(1); }}
                     disabled={opt.stock === 0}
                     className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
@@ -192,7 +181,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                     }`}
                   >
                     {opt.name}
-                    {opt.stock === 0 && ' (Tükendi)'}
+                    {opt.stock === 0 && ` (${t.product.sold_out})`}
                   </button>
                 ))}
               </div>
@@ -201,24 +190,24 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
 
           {/* Features */}
           <div className="bg-[#5C0A1A]/8 rounded-lg p-6 mb-6 border border-[#5C0A1A]/20">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Özellikleri</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">{t.product.features_title}</h3>
             <ul className="space-y-3">
               {product.dishwasherSafe && (
                 <li className="flex items-start">
                   <span className="text-charcoal font-bold mr-3">✓</span>
-                  <span className="text-gray-700">Bulaşık makinesinde güvenli</span>
+                  <span className="text-gray-700">{t.product.dishwasher_safe}</span>
                 </li>
               )}
               {product.microwave && (
                 <li className="flex items-start">
                   <span className="text-charcoal font-bold mr-3">✓</span>
-                  <span className="text-gray-700">Mikrodalgada güvenli</span>
+                  <span className="text-gray-700">{t.product.microwave_safe}</span>
                 </li>
               )}
               {product.handmade && (
                 <li className="flex items-start">
                   <span className="text-charcoal font-bold mr-3">✓</span>
-                  <span className="text-gray-700">El yapımı, benzersiz tasarım</span>
+                  <span className="text-gray-700">{t.product.handmade_unique}</span>
                 </li>
               )}
             </ul>
@@ -227,9 +216,9 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           {/* Stock Status */}
           <div className="mb-8">
             {availableStock > 0 ? (
-              <p className="text-green-600 font-semibold text-lg">✓ Stokta Var ({availableStock} adet)</p>
+              <p className="text-green-600 font-semibold text-lg">✓ {t.product.in_stock} ({availableStock})</p>
             ) : (
-              <p className="text-red-600 font-semibold text-lg">✗ Stokta Yok</p>
+              <p className="text-red-600 font-semibold text-lg">✗ {t.product.out_of_stock}</p>
             )}
           </div>
 
@@ -237,6 +226,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
           <div className="flex gap-3 mb-8">
             <div className="flex items-center border border-gray-300 rounded-lg">
               <button
+                type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 className="px-4 py-3 hover:bg-gray-100 transition-colors"
               >
@@ -252,10 +242,11 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                   setQuantity(Math.min(availableStock, Math.max(1, val)));
                 }}
                 className="w-16 text-center border-l border-r border-gray-300 py-2 focus:outline-none"
-                title="Ürün adedi"
-                aria-label="Ürün adedi"
+                title={t.product.quantity_label}
+                aria-label={t.product.quantity_label}
               />
               <button
+                type="button"
                 onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
                 className="px-4 py-3 hover:bg-gray-100 transition-colors"
               >
@@ -263,6 +254,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
               </button>
             </div>
             <button
+              type="button"
               onClick={handleAddToCart}
               disabled={availableStock === 0}
               className={`flex-1 font-bold py-3 px-6 rounded-lg transition-colors text-bone ${
@@ -273,7 +265,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
                   : 'bg-charcoal hover:bg-accent'
               }`}
             >
-              {addedToCart ? '✓ Sepete Eklendi' : 'Sepete Ekle'}
+              {addedToCart ? `✓ ${t.product.added_to_cart}` : t.product.add_to_cart}
             </button>
           </div>
 
@@ -282,7 +274,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
             href="/ceramics"
             className="block text-center text-charcoal hover:text-accent font-medium transition-colors"
           >
-            ← Ürünlere dön
+            ← {t.product.back_to_products}
           </Link>
         </div>
       </div>
@@ -290,7 +282,7 @@ export default function CeramicDetailClient({ product, relatedProducts }: Cerami
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <section className="mt-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">İlgili Ürünler</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t.product.related_title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map(relatedProduct => (
               <CeramicProductCard key={relatedProduct.id} product={relatedProduct} />

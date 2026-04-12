@@ -195,6 +195,28 @@ body {
   }
 }
 
+.parallax-about-divider {
+  background-image: url('https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=1920&q=80');
+}
+
+.parallax-home-cta {
+  background-image: url('https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1920&q=80');
+}
+
+/* ── Product image zoom ── */
+.image-zoom-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform: scale(1);
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+  transition: transform 0.3s ease;
+}
+.image-zoom-inner.is-hovered {
+  transform: scale(2);
+  transition: none;
+}
+
 /* ── Scroll Indicator ── */
 
 @keyframes scrollPulse {
