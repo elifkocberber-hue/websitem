@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/context/AdminContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ImageCropModal } from '@/components/ImageCropModal';
 
 interface ProductVariations {
   typeName: string;
@@ -66,6 +67,8 @@ export default function ProductsAdminPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragImageIndex, setDragImageIndex] = useState<number | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
+  const [cropQueue, setCropQueue] = useState<string[]>([]); // base64 kuyruğu
+  const [cropUploading, setCropUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -145,85 +148,80 @@ export default function ProductsAdminPage() {
     setFormData(EMPTY_PRODUCT);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
-
-    setUploading(true);
-    const newImages = [...formData.images];
-
-    for (const file of Array.from(files)) {
+  const handleProductCropConfirm = useCallback(async (blob: Blob) => {
+    setCropUploading(true);
+    try {
       const fd = new FormData();
-      fd.append('file', file);
-      try {
-        const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-        if (res.ok) {
-          const data = await res.json();
-          newImages.push(data.url);
-        } else {
-          const err = await res.json();
-          showMessage('error', err.error || 'Resim yüklenemedi');
-        }
-      } catch {
-        showMessage('error', 'Resim yüklenirken hata oluştu');
+      fd.append('file', blob, 'product.jpg');
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setFormData(prev => ({ ...prev, images: [...prev.images, data.url] }));
+      } else {
+        showMessage('error', data.error || 'Yükleme başarısız');
       }
+    } catch {
+      showMessage('error', 'Yükleme sırasında hata oluştu');
+    } finally {
+      setCropUploading(false);
+      setCropQueue(prev => prev.slice(1));
     }
+  }, []);
 
-    setFormData(prev => ({ ...prev, images: newImages }));
-    setUploading(false);
+  // Seçilen görselleri base64'e çevir, kırpma kuyruğuna ekle
+  const openCropQueue = useCallback((files: File[]) => {
+    const imageFiles = files.filter(f => /^image\//.test(f.type));
+    if (!imageFiles.length) return;
+    Promise.all(
+      imageFiles.map(f => new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(f);
+      }))
+    ).then(srcs => setCropQueue(srcs));
+  }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    openCropQueue(files);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleDropFiles = async (files: FileList) => {
     if (!files.length) return;
-    setUploading(true);
-    const newImages = [...formData.images];
+    const allFiles = Array.from(files);
+    const imageFiles = allFiles.filter(f => /^image\//.test(f.type) || /\.(jpg|jpeg|png|webp)$/i.test(f.name));
+    const videoFiles = allFiles.filter(f => /\.(mp4|webm|mov)$/i.test(f.name));
 
-    for (const file of Array.from(files)) {
-      const name = file.name.toLowerCase();
-      const isVideo = /\.(mp4|webm|mov)$/.test(name);
-      const isImage = /\.(jpg|jpeg|png|webp)$/.test(name);
+    // Görseller → kırpma kuyruğuna
+    if (imageFiles.length) openCropQueue(imageFiles);
 
-      if (!isVideo && !isImage) {
-        showMessage('error', `"${file.name}" desteklenmiyor. Kabul edilenler: JPG, PNG, WebP, MP4, WebM, MOV`);
-        continue;
-      }
-
-      // Dosya uzantısından content-type belirle (tarayıcının verdiğine güvenme)
-      const contentType = isVideo
-        ? (/\.webm$/.test(name) ? 'video/webm' : /\.mov$/.test(name) ? 'video/quicktime' : 'video/mp4')
-        : (file.type || 'image/jpeg');
-
-      try {
-        const signRes = await fetch('/api/admin/upload/signed-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName: file.name, contentType }),
-        });
-        if (!signRes.ok) {
-          const err = await signRes.json().catch(() => ({}));
-          showMessage('error', err.error || 'URL alınamadı');
-          continue;
+    // Videolar → doğrudan yükle
+    if (videoFiles.length) {
+      setUploading(true);
+      const newImages = [...formData.images];
+      for (const file of videoFiles) {
+        const name = file.name.toLowerCase();
+        const contentType = /\.webm$/.test(name) ? 'video/webm' : /\.mov$/.test(name) ? 'video/quicktime' : 'video/mp4';
+        try {
+          const signRes = await fetch('/api/admin/upload/signed-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName: file.name, contentType }),
+          });
+          if (!signRes.ok) { showMessage('error', 'Video URL alınamadı'); continue; }
+          const { signedUrl, publicUrl } = await signRes.json();
+          const uploadRes = await fetch(signedUrl, { method: 'PUT', headers: { 'Content-Type': contentType }, body: file });
+          if (!uploadRes.ok) { showMessage('error', `"${file.name}" yüklenemedi`); continue; }
+          newImages.push(publicUrl);
+        } catch (err) {
+          showMessage('error', 'Video yükleme hatası: ' + (err instanceof Error ? err.message : String(err)));
         }
-        const { signedUrl, publicUrl } = await signRes.json();
-
-        const uploadRes = await fetch(signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': contentType },
-          body: file,
-        });
-        if (!uploadRes.ok) {
-          showMessage('error', `"${file.name}" yüklenemedi (${uploadRes.status})`);
-          continue;
-        }
-        newImages.push(publicUrl);
-      } catch (err) {
-        showMessage('error', 'Yükleme hatası: ' + (err instanceof Error ? err.message : String(err)));
       }
+      setFormData(prev => ({ ...prev, images: newImages }));
+      setUploading(false);
     }
-
-    setFormData(prev => ({ ...prev, images: newImages }));
-    setUploading(false);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -869,6 +867,17 @@ export default function ProductsAdminPage() {
           </div>
         )}
       </main>
+
+      {/* ── Ürün görseli kırpma modalı ── */}
+      {cropQueue.length > 0 && (
+        <ImageCropModal
+          src={cropQueue[0]}
+          aspect={1}
+          uploading={cropUploading}
+          onConfirm={handleProductCropConfirm}
+          onClose={() => setCropQueue([])}
+        />
+      )}
     </div>
   );
 }

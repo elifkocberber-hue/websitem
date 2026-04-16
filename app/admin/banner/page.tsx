@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/context/AdminContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ImageCropModal } from '@/components/ImageCropModal';
 
 interface BannerSettings {
   items: string[];
@@ -33,6 +34,7 @@ export default function AdminBannerPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -62,26 +64,32 @@ export default function AdminBannerPage() {
     }
   };
 
-  const uploadFile = useCallback(async (file: File) => {
+  const uploadFile = useCallback((file: File) => {
     if (!ACCEPTED.includes(file.type)) {
       setMessage({ type: 'error', text: 'Desteklenen formatlar: JPEG, PNG, WebP' });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Dosya 5 MB\'dan küçük olmalıdır' });
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Dosya 10 MB\'dan küçük olmalıdır' });
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+  }, []);
 
+  const handleCropConfirm = useCallback(async (blob: Blob) => {
     setUploading(true);
     setMessage(null);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      const fd = new FormData();
+      fd.append('file', blob, 'hero.jpg');
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (res.ok && data.url) {
         setSettings((prev) => ({ ...prev, hero_image: data.url }));
         setMessage({ type: 'success', text: 'Görsel yüklendi! Kaydetmeyi unutmayın.' });
+        setCropSrc(null);
       } else {
         setMessage({ type: 'error', text: data.error || 'Yükleme başarısız' });
       }
@@ -373,6 +381,16 @@ export default function AdminBannerPage() {
           </>
         )}
       </main>
+
+      {cropSrc && (
+        <ImageCropModal
+          src={cropSrc}
+          aspect={16 / 9}
+          uploading={uploading}
+          onConfirm={handleCropConfirm}
+          onClose={() => { setCropSrc(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+        />
+      )}
     </div>
   );
 }

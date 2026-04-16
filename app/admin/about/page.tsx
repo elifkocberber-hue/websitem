@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/context/AdminContext';
 import Link from 'next/link';
 import Image from 'next/image';
-import Cropper from 'react-easy-crop';
-import type { Area } from 'react-easy-crop';
+import { ImageCropModal } from '@/components/ImageCropModal';
 
 interface AboutSettings {
   hero_image: string;
@@ -58,29 +57,6 @@ const DEFAULT: AboutSettings = {
   val4_desc: 'Doğaya saygılı üretim süreçleriyle geleceğe yatırım yapıyoruz.',
 };
 
-// Canvas ile kırpılmış görseli Blob olarak üretir
-async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new window.Image();
-    image.crossOrigin = 'anonymous';
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = imageSrc;
-  });
-
-  const canvas = document.createElement('canvas');
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
-  const ctx = canvas.getContext('2d')!;
-  ctx.drawImage(img, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height);
-
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error('Canvas toBlob failed'));
-    }, 'image/jpeg', 0.92);
-  });
-}
 
 function Field({
   id, label, value, onChange, multiline = false, hint,
@@ -116,9 +92,6 @@ export default function AdminAboutPage() {
 
   // Kırpma modal state
   const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/sergenim/login');
@@ -149,24 +122,18 @@ export default function AdminAboutPage() {
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => {
-      setCropSrc(reader.result as string);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    };
+    reader.onload = () => setCropSrc(reader.result as string);
     reader.readAsDataURL(file);
   }, []);
 
-  // Kırpma onaylandığında canvas ile kes, yükle
-  const handleCropConfirm = async () => {
-    if (!cropSrc || !croppedAreaPixels) return;
+  // Kırpma onaylandığında yükle
+  const handleCropConfirm = useCallback(async (blob: Blob) => {
     setUploading(true);
     setMessage(null);
     try {
-      const blob = await getCroppedBlob(cropSrc, croppedAreaPixels);
-      const formData = new FormData();
-      formData.append('file', blob, 'hero.jpg');
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      const fd = new FormData();
+      fd.append('file', blob, 'hero.jpg');
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (res.ok && data.url) {
         setSettings((prev) => ({ ...prev, hero_image: data.url }));
@@ -181,7 +148,7 @@ export default function AdminAboutPage() {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
-  };
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -349,62 +316,13 @@ export default function AdminAboutPage() {
 
       {/* ── Kırpma Modalı ── */}
       {cropSrc && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black">
-          {/* Cropper alanı */}
-          <div className="relative flex-1">
-            <Cropper
-              image={cropSrc}
-              crop={crop}
-              zoom={zoom}
-              aspect={16 / 6}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
-              showGrid={false}
-            />
-          </div>
-
-          {/* Kontroller */}
-          <div className="bg-gray-900 px-6 py-5 space-y-4">
-            {/* Zoom slider */}
-            <div className="flex items-center gap-4">
-              <button type="button" onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
-                className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-full hover:bg-white/20 text-lg font-bold">−</button>
-              <input
-                type="range" min={1} max={3} step={0.01}
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-                className="flex-1 accent-[#DD6B56]"
-                aria-label="Yakınlaştırma"
-              />
-              <button type="button" onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
-                className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-full hover:bg-white/20 text-lg font-bold">+</button>
-              <span className="text-white/60 text-sm w-12 text-right">{Math.round(zoom * 100)}%</span>
-            </div>
-
-            <p className="text-white/40 text-xs text-center">Görseli sürükleyerek konumlandırın · Kaydırarak yakınlaştırın</p>
-
-            {/* Butonlar */}
-            <div className="flex gap-3 justify-end">
-              <button type="button" onClick={() => { setCropSrc(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                className="px-6 py-2.5 rounded-lg border border-white/20 text-white text-sm hover:bg-white/10 transition">
-                İptal
-              </button>
-              <button type="button" onClick={handleCropConfirm} disabled={uploading}
-                className="px-6 py-2.5 rounded-lg bg-[#DD6B56] hover:bg-[#C45540] disabled:opacity-50 text-white text-sm font-semibold transition flex items-center gap-2">
-                {uploading ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                    Yükleniyor...
-                  </>
-                ) : 'Uygula'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ImageCropModal
+          src={cropSrc}
+          aspect={16 / 6}
+          uploading={uploading}
+          onConfirm={handleCropConfirm}
+          onClose={() => { setCropSrc(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+        />
       )}
     </div>
   );
