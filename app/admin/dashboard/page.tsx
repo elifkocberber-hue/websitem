@@ -176,6 +176,12 @@ export default function AdminDashboardPage() {
           >
             💬 SSS Yönetimi
           </Link>
+          <Link
+            href="/admin/about"
+            className="inline-flex items-center gap-2 bg-stone-600 hover:bg-stone-700 text-white font-medium py-2 px-5 rounded-lg transition"
+          >
+            📖 Hikayemiz
+          </Link>
         </div>
 
         {/* Stats Cards */}

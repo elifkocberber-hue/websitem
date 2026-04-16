@@ -4,22 +4,64 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useLanguage } from '@/context/LanguageContext';
+import { useEffect, useState } from 'react';
+
+interface AboutSettings {
+  hero_image: string;
+  founded: string;
+  story_title: string;
+  story_p1: string;
+  story_p2: string;
+  story_p3: string;
+  stat1_value: string;
+  stat1_label: string;
+  stat2_value: string;
+  stat2_label: string;
+  stat3_value: string;
+  stat3_label: string;
+  stat4_value: string;
+  stat4_label: string;
+  val1_title: string;
+  val1_desc: string;
+  val2_title: string;
+  val2_desc: string;
+  val3_title: string;
+  val3_desc: string;
+  val4_title: string;
+  val4_desc: string;
+}
 
 export default function AboutPage() {
   const { t } = useLanguage();
+  const [about, setAbout] = useState<AboutSettings | null>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/about')
+      .then((r) => r.json())
+      .then((d) => setAbout(d))
+      .catch(() => {});
+  }, []);
+
+  // Fallback to translations when DB data isn't loaded yet
+  const heroImage = about?.hero_image ?? 'https://images.unsplash.com/photo-1604424321003-50b9174b28e3?w=1920&q=80';
+  const founded = about?.founded ?? t.about.founded;
+  const storyTitle = about?.story_title ?? t.about.story_title;
+  const storyP1 = about?.story_p1 ?? t.about.story_p1;
+  const storyP2 = about?.story_p2 ?? t.about.story_p2;
+  const storyP3 = about?.story_p3 ?? t.about.story_p3;
 
   const stats = [
-    { value: '30+', label: t.about.stat1 },
-    { value: '400+', label: t.about.stat2 },
-    { value: '%98', label: t.about.stat3 },
-    { value: '3', label: t.about.stat4 },
+    { value: about?.stat1_value ?? '30+', label: about?.stat1_label ?? t.about.stat1 },
+    { value: about?.stat2_value ?? '400+', label: about?.stat2_label ?? t.about.stat2 },
+    { value: about?.stat3_value ?? '%98', label: about?.stat3_label ?? t.about.stat3 },
+    { value: about?.stat4_value ?? '3', label: about?.stat4_label ?? t.about.stat4 },
   ];
 
   const values = [
-    { title: t.about.val1_title, desc: t.about.val1_desc },
-    { title: t.about.val2_title, desc: t.about.val2_desc },
-    { title: t.about.val3_title, desc: t.about.val3_desc },
-    { title: t.about.val4_title, desc: t.about.val4_desc },
+    { title: about?.val1_title ?? t.about.val1_title, desc: about?.val1_desc ?? t.about.val1_desc },
+    { title: about?.val2_title ?? t.about.val2_title, desc: about?.val2_desc ?? t.about.val2_desc },
+    { title: about?.val3_title ?? t.about.val3_title, desc: about?.val3_desc ?? t.about.val3_desc },
+    { title: about?.val4_title ?? t.about.val4_title, desc: about?.val4_desc ?? t.about.val4_desc },
   ];
 
   return (
@@ -27,11 +69,12 @@ export default function AboutPage() {
       {/* ═══════ HERO ═══════ */}
       <section className="relative h-[60vh] min-h-100 overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1604424321003-50b9174b28e3?w=1920&q=80"
+          src={heroImage}
           alt="El's Dream Factory seramik atölyesi - el yapımı seramik üretim"
           fill
           className="object-cover"
           priority
+          unoptimized={heroImage.startsWith('http')}
         />
         <div className="absolute inset-0 bg-charcoal/40" />
         <div className="relative z-10 h-full flex items-end pb-12 md:pb-16">
@@ -46,13 +89,13 @@ export default function AboutPage() {
       <section className="max-w-350 mx-auto px-6 md:px-10 py-20 md:py-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <ScrollReveal direction="left">
-            <p className="text-xs tracking-[0.2em] uppercase text-accent mb-4">{t.about.founded}</p>
+            <p className="text-xs tracking-[0.2em] uppercase text-accent mb-4">{founded}</p>
             <h2 className="heading-display text-3xl md:text-4xl text-charcoal mb-6 whitespace-pre-line">
-              {t.about.story_title}
+              {storyTitle}
             </h2>
-            <p className="text-earth leading-relaxed mb-4">{t.about.story_p1}</p>
-            <p className="text-earth leading-relaxed mb-4">{t.about.story_p2}</p>
-            <p className="text-earth leading-relaxed">{t.about.story_p3}</p>
+            <p className="text-earth leading-relaxed mb-4">{storyP1}</p>
+            <p className="text-earth leading-relaxed mb-4">{storyP2}</p>
+            <p className="text-earth leading-relaxed">{storyP3}</p>
           </ScrollReveal>
           <ScrollReveal direction="right">
             <div className="relative aspect-4/5">

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { fetchProducts } from '@/data/ceramicProducts';
+import { supabase } from '@/lib/supabase';
 import CeramicsClient from './CeramicsClient';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,12 @@ export const metadata: Metadata = {
 };
 
 export default async function CeramicsPage() {
-  const products = await fetchProducts();
+  const [products, categoriesResult] = await Promise.all([
+    fetchProducts(),
+    supabase.from('categories').select('name').order('sort_order', { ascending: true }),
+  ]);
 
-  return <CeramicsClient products={products} />;
+  const definedCategories = (categoriesResult.data ?? []).map((c: { name: string }) => c.name);
+
+  return <CeramicsClient products={products} definedCategories={definedCategories} />;
 }

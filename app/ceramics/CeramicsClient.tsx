@@ -19,17 +19,14 @@ const imageClasses = ['aspect-[4/5]', 'aspect-[3/4]', 'aspect-square', 'aspect-[
 
 interface CeramicsClientProps {
   products: CeramicProduct[];
+  definedCategories: string[];
 }
 
-export default function CeramicsClient({ products }: CeramicsClientProps) {
+export default function CeramicsClient({ products, definedCategories }: CeramicsClientProps) {
   const { t, language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedClayType, setSelectedClayType] = useState<string | null>(null);
-  const [showHandmadeOnly, setShowHandmadeOnly] = useState(false);
-
-  const categories = Array.from(new Set(
-    products.flatMap(p => (p.categories && p.categories.length > 0) ? p.categories : (p.category ? [p.category] : []))
-  ));
+  const categories = definedCategories;
   const clayTypes = Array.from(new Set(products.map(p => p.clayType))) as CeramicProduct['clayType'][];
 
   let filteredProducts = products;
@@ -39,9 +36,8 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
       : p.category === selectedCategory
   );
   if (selectedClayType) filteredProducts = filteredProducts.filter(p => p.clayType === selectedClayType);
-  if (showHandmadeOnly) filteredProducts = filteredProducts.filter(p => p.handmade);
 
-  const hasActiveFilters = selectedCategory || selectedClayType || showHandmadeOnly;
+  const hasActiveFilters = selectedCategory || selectedClayType;
 
   const getClayLabel = (ct: string) =>
     clayTypeLabels[ct]?.[language] ?? ct;
@@ -65,26 +61,6 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
         {/* Sidebar Filters */}
         <aside className="lg:sticky lg:top-23 lg:self-start">
           <div className="space-y-8">
-            {/* Handmade toggle */}
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={showHandmadeOnly}
-                onChange={(e) => setShowHandmadeOnly(e.target.checked)}
-                className="sr-only"
-              />
-              <div className={`w-5 h-5 border flex items-center justify-center transition-colors ${
-                showHandmadeOnly ? 'bg-charcoal border-charcoal' : 'border-clay group-hover:border-charcoal'
-              }`}>
-                {showHandmadeOnly && (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-              </div>
-              <span className="text-sm text-charcoal">{t.ceramics.handmade_only}</span>
-            </label>
-
             {/* Category */}
             <div>
               <h3 className="text-[11px] tracking-[0.15em] uppercase text-earth mb-4">{t.ceramics.category_label}</h3>
@@ -137,7 +113,7 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
             {hasActiveFilters && (
               <button
                 type="button"
-                onClick={() => { setSelectedCategory(null); setSelectedClayType(null); setShowHandmadeOnly(false); }}
+                onClick={() => { setSelectedCategory(null); setSelectedClayType(null); }}
                 className="text-sm text-accent hover:text-charcoal transition-colors"
               >
                 {t.ceramics.clear_filters}
@@ -169,7 +145,7 @@ export default function CeramicsClient({ products }: CeramicsClientProps) {
               <p className="heading-serif text-xl text-charcoal mb-4">{t.ceramics.no_products}</p>
               <button
                 type="button"
-                onClick={() => { setSelectedCategory(null); setSelectedClayType(null); setShowHandmadeOnly(false); }}
+                onClick={() => { setSelectedCategory(null); setSelectedClayType(null); }}
                 className="text-sm text-accent hover:text-charcoal transition-colors"
               >
                 {t.ceramics.clear_filters}
