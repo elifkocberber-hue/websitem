@@ -62,8 +62,8 @@ export function ImageCropModal({ src, aspect, onConfirm, onClose, uploading = fa
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black">
-      {/* Cropper alanı */}
-      <div className="relative flex-1">
+      {/* Cropper alanı — min-h-0 flex çocuğunun yüksekliği doğru hesaplaması için gerekli */}
+      <div className="relative flex-1 min-h-0">
         <Cropper
           image={src}
           crop={crop}
