@@ -16,6 +16,27 @@ const DEFAULT_ABOUT = {
   story_p2: 'Doğal topraklar, geleneksel teknikler ve modern tasarım anlayışımız ile yaşam alanlarınıza sanat katıyoruz.',
 };
 
+const DEFAULT_HOMEPAGE = {
+  hero_subtitle: 'El Yapımı Seramik Ürünler & Hediyeler',
+  hero_title: 'Fırından Yeni Çıkan\nMutluluklar',
+  hero_desc: 'Doğanın toprağından, ustalarımızın elleriyle şekillenen; evinize anlam ve güzellik katan eserler.',
+  collection_label: 'Koleksiyon',
+  featured_title: 'Öne Çıkan Eserler',
+  philosophy_label: 'Felsefemiz',
+  philosophy_title: 'Wabi-Sabi',
+  philosophy_desc: 'Kusursuzlukta güzellik aramıyoruz. Her çatlak, her doku, her asimetri — tabiatın ve insan elinin imzası.',
+  pillar1_title: 'Geleneksel Zanaat',
+  pillar1_desc: 'Yüzyıllık teknikleri modern formlarla buluşturuyoruz.',
+  pillar2_title: 'Doğal Malzeme',
+  pillar2_desc: 'En kaliteli topraklar ve organik cilalarla üretiyoruz.',
+  pillar3_title: 'Benzersiz Tasarım',
+  pillar3_desc: 'Her parça tek ve tekrarlanamaz bir sanat eseridir.',
+  cta_title: 'Evinize Sanat Katın',
+  cta_btn: 'Alışverişe Başla',
+  newsletter_title: 'Haberdar Olun',
+  newsletter_desc: 'Yeni koleksiyonlar, özel teklifler ve atölyeden haberler.',
+};
+
 async function fetchBannerSettings() {
   noStore();
   try {
@@ -44,13 +65,28 @@ async function fetchAboutSettings() {
   }
 }
 
+async function fetchHomepageSettings() {
+  noStore();
+  try {
+    const { data } = await supabase
+      .from('homepage_settings')
+      .select('*')
+      .eq('id', 1)
+      .single();
+    return { ...DEFAULT_HOMEPAGE, ...(data ?? {}) };
+  } catch {
+    return DEFAULT_HOMEPAGE;
+  }
+}
+
 export default async function Home() {
-  const [allProducts, banner, about] = await Promise.all([
+  const [allProducts, banner, about, homepage] = await Promise.all([
     fetchProducts(),
     fetchBannerSettings(),
     fetchAboutSettings(),
+    fetchHomepageSettings(),
   ]);
   const featured = allProducts.slice(0, 4);
 
-  return <HomeClient featured={featured} banner={banner} about={about} />;
+  return <HomeClient featured={featured} banner={banner} about={about} homepage={homepage} />;
 }

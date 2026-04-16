@@ -182,6 +182,12 @@ export default function AdminDashboardPage() {
           >
             📖 Hikayemiz
           </Link>
+          <Link
+            href="/admin/homepage"
+            className="inline-flex items-center gap-2 bg-sky-700 hover:bg-sky-800 text-white font-medium py-2 px-5 rounded-lg transition"
+          >
+            🏠 Anasayfa Metinleri
+          </Link>
         </div>
 
         {/* Stats Cards */}
