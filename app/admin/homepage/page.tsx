@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/context/AdminContext';
 import Link from 'next/link';
+import Image from 'next/image';
+import { ImageCropModal } from '@/components/ImageCropModal';
 
 interface HomepageSettings {
+  cta_image: string;
   hero_subtitle: string;
   hero_title: string;
   hero_desc: string;
@@ -27,6 +30,7 @@ interface HomepageSettings {
 }
 
 const DEFAULT: HomepageSettings = {
+  cta_image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1920&q=80',
   hero_subtitle: 'El Yapımı Seramik Ürünler & Hediyeler',
   hero_title: 'Fırından Yeni Çıkan\nMutluluklar',
   hero_desc: 'Doğanın toprağından, ustalarımızın elleriyle şekillenen; evinize anlam ve güzellik katan eserler.',
@@ -94,6 +98,10 @@ export default function AdminHomepagePage() {
   const [settings, setSettings] = useState<HomepageSettings>(DEFAULT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const ctaFileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -112,6 +120,44 @@ export default function AdminHomepagePage() {
 
   const set = (key: keyof HomepageSettings) => (value: string) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
+
+  const uploadFile = useCallback((file: File) => {
+    const ACCEPTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!ACCEPTED.includes(file.type)) {
+      setMessage({ type: 'error', text: 'Desteklenen formatlar: JPEG, PNG, WebP' });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Dosya 10 MB\'dan küçük olmalıdır' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleCropConfirm = useCallback(async (blob: Blob) => {
+    setUploading(true);
+    setMessage(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', blob, 'cta.jpg');
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setSettings((prev) => ({ ...prev, cta_image: data.url }));
+        setMessage({ type: 'success', text: 'Görsel yüklendi! Kaydetmeyi unutmayın.' });
+        setCropSrc(null);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Yükleme başarısız' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Yükleme sırasında hata oluştu' });
+    } finally {
+      setUploading(false);
+      if (ctaFileInputRef.current) ctaFileInputRef.current.value = '';
+    }
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -206,8 +252,69 @@ export default function AdminHomepagePage() {
             </div>
 
             {/* ── CTA ── */}
-            <div className="bg-white rounded-lg shadow p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-gray-800">CTA Bölümü</h2>
+            <div className="bg-white rounded-lg shadow p-6 space-y-5">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">CTA Bölümü</h2>
+                <p className="text-sm text-gray-500 mt-1">&quot;Evinize Sanat Katın — Alışverişe Başla&quot; bölümünün arka plan görseli ve metinleri.</p>
+              </div>
+
+              {/* Görsel yükleme */}
+              <div
+                onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) uploadFile(f); }}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={(e) => { e.preventDefault(); setDragOver(false); }}
+                onClick={() => !uploading && ctaFileInputRef.current?.click()}
+                className={`relative w-full rounded-xl border-2 border-dashed transition-all cursor-pointer overflow-hidden
+                  ${dragOver ? 'border-[#DD6B56] bg-[#DD6B56]/5 scale-[1.01]' : 'border-gray-300 hover:border-[#DD6B56] hover:bg-gray-50'}
+                  ${uploading ? 'cursor-not-allowed opacity-70' : ''}`}
+              >
+                <div className="relative w-full h-56">
+                  <Image
+                    src={settings.cta_image}
+                    alt="CTA arka plan önizleme"
+                    fill
+                    className="object-cover rounded-lg"
+                    unoptimized={settings.cta_image.startsWith('http')}
+                  />
+                  <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-colors rounded-lg
+                    ${dragOver ? 'bg-[#DD6B56]/60' : 'bg-black/40 hover:bg-black/50'}`}
+                  >
+                    {dragOver ? (
+                      <>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /><path d="M20 21H4" />
+                        </svg>
+                        <p className="text-white text-sm font-semibold">Bırak!</p>
+                      </>
+                    ) : (
+                      <>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <div className="text-center">
+                          <p className="text-white text-sm font-semibold">Görseli buraya sürükle</p>
+                          <p className="text-white/70 text-xs mt-0.5">veya tıkla ve seç</p>
+                        </div>
+                        <span className="text-white/50 text-xs">JPEG · PNG · WebP · Maks. 10 MB</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <input
+                  ref={ctaFileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}
+                  className="hidden"
+                  aria-label="CTA arka plan görseli yükle"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500 mb-1.5">Ya da görsel URL&apos;si girin:</p>
+                <Field id="cta_image" label="" value={settings.cta_image} onChange={set('cta_image')} />
+              </div>
+
               <Field id="cta_title" label="Başlık" value={settings.cta_title} onChange={set('cta_title')} hint='Örn: "Evinize Sanat Katın"' />
               <Field id="cta_btn" label="Buton metni" value={settings.cta_btn} onChange={set('cta_btn')} hint='Örn: "Alışverişe Başla"' />
             </div>
@@ -238,6 +345,16 @@ export default function AdminHomepagePage() {
           </>
         )}
       </main>
+
+      {cropSrc && (
+        <ImageCropModal
+          src={cropSrc}
+          aspect={16 / 9}
+          uploading={uploading}
+          onConfirm={handleCropConfirm}
+          onClose={() => { setCropSrc(null); if (ctaFileInputRef.current) ctaFileInputRef.current.value = ''; }}
+        />
+      )}
     </div>
   );
 }

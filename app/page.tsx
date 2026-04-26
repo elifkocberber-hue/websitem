@@ -32,6 +32,7 @@ const DEFAULT_HOMEPAGE = {
   pillar2_desc: 'En kaliteli topraklar ve organik cilalarla üretiyoruz.',
   pillar3_title: 'Benzersiz Tasarım',
   pillar3_desc: 'Her parça tek ve tekrarlanamaz bir sanat eseridir.',
+  cta_image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1920&q=80',
   cta_title: 'Evinize Sanat Katın',
   cta_btn: 'Alışverişe Başla',
   newsletter_title: 'Haberdar Olun',

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS homepage_settings (
   pillar2_desc TEXT NOT NULL DEFAULT 'En kaliteli topraklar ve organik cilalarla üretiyoruz.',
   pillar3_title TEXT NOT NULL DEFAULT 'Benzersiz Tasarım',
   pillar3_desc TEXT NOT NULL DEFAULT 'Her parça tek ve tekrarlanamaz bir sanat eseridir.',
+  cta_image TEXT NOT NULL DEFAULT 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1920&q=80',
   cta_title TEXT NOT NULL DEFAULT 'Evinize Sanat Katın',
   cta_btn TEXT NOT NULL DEFAULT 'Alışverişe Başla',
   newsletter_title TEXT NOT NULL DEFAULT 'Haberdar Olun',
