@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 
 interface AboutSettings {
   hero_image: string;
+  story_image: string;
   founded: string;
   story_title: string;
   story_p1: string;
@@ -44,6 +45,7 @@ export default function AboutPage() {
 
   // Fallback to translations when DB data isn't loaded yet
   const heroImage = about?.hero_image ?? 'https://images.unsplash.com/photo-1604424321003-50b9174b28e3?w=1920&q=80';
+  const storyImage = about?.story_image ?? 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80';
   const founded = about?.founded ?? t.about.founded;
   const storyTitle = about?.story_title ?? t.about.story_title;
   const storyP1 = about?.story_p1 ?? t.about.story_p1;
@@ -100,10 +102,11 @@ export default function AboutPage() {
           <ScrollReveal direction="right">
             <div className="relative aspect-4/5">
               <Image
-                src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80"
+                src={storyImage}
                 alt="Seramik üretim süreci"
                 fill
                 className="object-cover"
+                unoptimized={storyImage.startsWith('http')}
               />
             </div>
           </ScrollReveal>
