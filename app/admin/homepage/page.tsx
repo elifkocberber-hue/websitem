@@ -9,6 +9,7 @@ import { ImageCropModal } from '@/components/ImageCropModal';
 
 interface HomepageSettings {
   cta_image: string;
+  cta_overlay_opacity: number;
   hero_subtitle: string;
   hero_title: string;
   hero_desc: string;
@@ -45,6 +46,7 @@ const DEFAULT: HomepageSettings = {
   pillar2_desc: 'En kaliteli topraklar ve organik cilalarla üretiyoruz.',
   pillar3_title: 'Benzersiz Tasarım',
   pillar3_desc: 'Her parça tek ve tekrarlanamaz bir sanat eseridir.',
+  cta_overlay_opacity: 60,
   cta_title: 'Evinize Sanat Katın',
   cta_btn: 'Alışverişe Başla',
   newsletter_title: 'Haberdar Olun',
@@ -353,6 +355,28 @@ export default function AdminHomepagePage() {
               <div>
                 <p className="text-xs text-gray-500 mb-1.5">Ya da görsel URL&apos;si girin:</p>
                 <Field id="cta_image" label="" value={settings.cta_image} onChange={set('cta_image')} />
+              </div>
+
+              {/* Overlay opaklık slider */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">Karartma Opaklığı</label>
+                  <span className="text-sm font-semibold text-[#DD6B56] w-10 text-right">%{settings.cta_overlay_opacity}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={settings.cta_overlay_opacity}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, cta_overlay_opacity: Number(e.target.value) }))}
+                  className="w-full accent-[#DD6B56]"
+                  aria-label="Karartma opaklığı"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>%0 — Görsel net</span>
+                  <span>%100 — Tam siyah</span>
+                </div>
               </div>
 
               <Field id="cta_title" label="Başlık" value={settings.cta_title} onChange={set('cta_title')} hint='Örn: "Evinize Sanat Katın"' />

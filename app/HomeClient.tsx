@@ -38,6 +38,7 @@ interface HomepageData {
   pillar3_title: string;
   pillar3_desc: string;
   cta_image: string;
+  cta_overlay_opacity: number;
   cta_title: string;
   cta_btn: string;
   newsletter_title: string;
@@ -207,9 +208,9 @@ export default function HomeClient({ featured, banner, about, homepage }: HomeCl
       </section>
 
       {/* ═══════ PARALLAX CTA ═══════ */}
-      <style>{`.parallax-home-cta{background-image:url('${homepage.cta_image}')}`}</style>
+      <style>{`.parallax-home-cta{background-image:url('${homepage.cta_image}')}.parallax-home-cta .cta-overlay{opacity:${(homepage.cta_overlay_opacity ?? 60) / 100}}`}</style>
       <section className="relative h-[50vh] min-h-100 parallax-section parallax-home-cta">
-        <div className="absolute inset-0 bg-charcoal/60" />
+        <div className="cta-overlay absolute inset-0 bg-charcoal" />
         <div className="relative z-10 h-full flex items-center justify-center text-center px-6">
           <ScrollReveal direction="scale">
             <h2 className="heading-display text-bone text-3xl md:text-5xl mb-8">
