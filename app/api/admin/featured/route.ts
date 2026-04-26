@@ -9,12 +9,13 @@ export async function GET() {
     supabase.from('homepage_settings').select('featured_product_ids').eq('id', 1).single(),
   ]);
 
-  const products = (productsRes.data ?? []).map((p: Record<string, unknown>) => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    image: Array.isArray(p.images) && (p.images as string[]).length > 0 ? (p.images as string[])[0] : null,
-  }));
+  const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
+
+  const products = (productsRes.data ?? []).map((p: Record<string, unknown>) => {
+    const images = Array.isArray(p.images) ? (p.images as string[]) : [];
+    const image = images.find((img) => !isVideo(img)) ?? null;
+    return { id: p.id, name: p.name, price: p.price, image };
+  });
 
   const featuredIds: (number | string)[] = settingsRes.data?.featured_product_ids ?? [];
 
