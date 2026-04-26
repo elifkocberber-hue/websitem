@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 interface AboutSettings {
   hero_image: string;
   story_image: string;
+  craft_image: string;
   founded: string;
   story_title: string;
   story_p1: string;
@@ -46,6 +47,7 @@ export default function AboutPage() {
   // Fallback to translations when DB data isn't loaded yet
   const heroImage = about?.hero_image ?? 'https://images.unsplash.com/photo-1604424321003-50b9174b28e3?w=1920&q=80';
   const storyImage = about?.story_image ?? 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80';
+  const craftImage = about?.craft_image ?? 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=1920&q=80';
   const founded = about?.founded ?? t.about.founded;
   const storyTitle = about?.story_title ?? t.about.story_title;
   const storyP1 = about?.story_p1 ?? t.about.story_p1;
@@ -114,6 +116,7 @@ export default function AboutPage() {
       </section>
 
       {/* ═══════ PARALLAX DIVIDER ═══════ */}
+      <style>{`.parallax-about-divider{background-image:url('${craftImage}')}`}</style>
       <section className="relative h-[40vh] min-h-75 parallax-section parallax-about-divider">
         <div className="absolute inset-0 bg-charcoal/30" />
       </section>

@@ -10,6 +10,7 @@ import { ImageCropModal } from '@/components/ImageCropModal';
 interface AboutSettings {
   hero_image: string;
   story_image: string;
+  craft_image: string;
   founded: string;
   story_title: string;
   story_p1: string;
@@ -36,6 +37,7 @@ interface AboutSettings {
 const DEFAULT: AboutSettings = {
   hero_image: 'https://images.unsplash.com/photo-1604424321003-50b9174b28e3?w=1920&q=80',
   story_image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80',
+  craft_image: 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=800&q=80',
   founded: 'Kuruluş · 1994',
   story_title: 'Topraktan\nDünyaya',
   story_p1: 'Üç kuşaklık seramik geleneğini taşıyan atölyemiz, 1994 yılında kuruldu.',
@@ -88,14 +90,15 @@ export default function AdminAboutPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState<'hero_image' | 'story_image' | null>(null);
+  const [dragOver, setDragOver] = useState<'hero_image' | 'story_image' | 'craft_image' | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const heroFileInputRef = useRef<HTMLInputElement>(null);
   const storyFileInputRef = useRef<HTMLInputElement>(null);
+  const craftFileInputRef = useRef<HTMLInputElement>(null);
 
   // Kırpma modal state
   const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [activeImageField, setActiveImageField] = useState<'hero_image' | 'story_image'>('hero_image');
+  const [activeImageField, setActiveImageField] = useState<'hero_image' | 'story_image' | 'craft_image'>('hero_image');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/sergenim/login');
@@ -114,13 +117,14 @@ export default function AdminAboutPage() {
   const set = (key: keyof AboutSettings) => (value: string) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
 
-  const openFilePicker = (field: 'hero_image' | 'story_image') => {
+  const openFilePicker = (field: 'hero_image' | 'story_image' | 'craft_image') => {
     setActiveImageField(field);
     if (field === 'hero_image') heroFileInputRef.current?.click();
-    else storyFileInputRef.current?.click();
+    else if (field === 'story_image') storyFileInputRef.current?.click();
+    else craftFileInputRef.current?.click();
   };
 
-  const uploadFile = useCallback((file: File, field: 'hero_image' | 'story_image') => {
+  const uploadFile = useCallback((file: File, field: 'hero_image' | 'story_image' | 'craft_image') => {
     const ACCEPTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!ACCEPTED.includes(file.type)) {
       setMessage({ type: 'error', text: 'Desteklenen formatlar: JPEG, PNG, WebP' });
@@ -157,22 +161,23 @@ export default function AdminAboutPage() {
       setUploading(false);
       heroFileInputRef.current && (heroFileInputRef.current.value = '');
       storyFileInputRef.current && (storyFileInputRef.current.value = '');
+      craftFileInputRef.current && (craftFileInputRef.current.value = '');
     }
   }, [activeImageField]);
 
-  const handleFileInput = (field: 'hero_image' | 'story_image') => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInput = (field: 'hero_image' | 'story_image' | 'craft_image') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) uploadFile(file, field);
   };
 
-  const handleDrop = (field: 'hero_image' | 'story_image') => (e: React.DragEvent) => {
+  const handleDrop = (field: 'hero_image' | 'story_image' | 'craft_image') => (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(null);
     const file = e.dataTransfer.files?.[0];
     if (file) uploadFile(file, field);
   };
 
-  const handleDragOver = (field: 'hero_image' | 'story_image') => (e: React.DragEvent) => {
+  const handleDragOver = (field: 'hero_image' | 'story_image' | 'craft_image') => (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(field);
   };
@@ -359,6 +364,70 @@ export default function AdminAboutPage() {
               </div>
             </div>
 
+            {/* ── Zanaat Görseli ── */}
+            <div className="bg-white rounded-lg shadow p-6 space-y-5">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Zanaat Görseli</h2>
+                <p className="text-sm text-gray-500 mt-1">Anasayfadaki &quot;Hakkımızda&quot; bölümünde ve Hikayemiz sayfasındaki parallax bantında görünen görsel.</p>
+              </div>
+
+              <div
+                onDrop={handleDrop('craft_image')}
+                onDragOver={handleDragOver('craft_image')}
+                onDragLeave={handleDragLeave}
+                onClick={() => !uploading && openFilePicker('craft_image')}
+                className={`relative w-full rounded-xl border-2 border-dashed transition-all cursor-pointer overflow-hidden
+                  ${dragOver === 'craft_image' ? 'border-[#DD6B56] bg-[#DD6B56]/5 scale-[1.01]' : 'border-gray-300 hover:border-[#DD6B56] hover:bg-gray-50'}
+                  ${uploading ? 'cursor-not-allowed opacity-70' : ''}`}
+              >
+                <div className="relative w-full h-56">
+                  <Image
+                    src={settings.craft_image}
+                    alt="Zanaat görseli önizleme"
+                    fill
+                    className="object-cover rounded-lg"
+                    unoptimized={settings.craft_image.startsWith('http')}
+                  />
+                  <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-colors rounded-lg
+                    ${dragOver === 'craft_image' ? 'bg-[#DD6B56]/60' : 'bg-black/40 hover:bg-black/50'}`}
+                  >
+                    {dragOver === 'craft_image' ? (
+                      <>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /><path d="M20 21H4" />
+                        </svg>
+                        <p className="text-white text-sm font-semibold">Bırak!</p>
+                      </>
+                    ) : (
+                      <>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <div className="text-center">
+                          <p className="text-white text-sm font-semibold">Görseli buraya sürükle</p>
+                          <p className="text-white/70 text-xs mt-0.5">veya tıkla ve seç</p>
+                        </div>
+                        <span className="text-white/50 text-xs">JPEG · PNG · WebP · Maks. 10 MB</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <input
+                  ref={craftFileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleFileInput('craft_image')}
+                  className="hidden"
+                  aria-label="Zanaat görseli yükle"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500 mb-1.5">Ya da görsel URL&apos;si girin:</p>
+                <Field id="craft_image" label="" value={settings.craft_image} onChange={set('craft_image')} />
+              </div>
+            </div>
+
             {/* ── Hikaye Metni ── */}
             <div className="bg-white rounded-lg shadow p-6 space-y-4">
               <h2 className="text-lg font-semibold text-gray-800">Hikaye Bölümü</h2>
@@ -412,13 +481,14 @@ export default function AdminAboutPage() {
       {cropSrc && (
         <ImageCropModal
           src={cropSrc}
-          aspect={activeImageField === 'story_image' ? 4 / 5 : 16 / 6}
+          aspect={activeImageField === 'story_image' ? 4 / 5 : activeImageField === 'craft_image' ? 16 / 9 : 16 / 6}
           uploading={uploading}
           onConfirm={handleCropConfirm}
           onClose={() => {
             setCropSrc(null);
             heroFileInputRef.current && (heroFileInputRef.current.value = '');
             storyFileInputRef.current && (storyFileInputRef.current.value = '');
+            craftFileInputRef.current && (craftFileInputRef.current.value = '');
           }}
         />
       )}

@@ -14,6 +14,7 @@ const DEFAULT_ABOUT = {
   story_title: 'Topraktan\nDünyaya',
   story_p1: '1994\'ten bu yana seramik geleneğini yaşatıyoruz. Her ürünümüz, ustalarımızın ellerinde şekillenen benzersiz bir sanat eseri.',
   story_p2: 'Doğal topraklar, geleneksel teknikler ve modern tasarım anlayışımız ile yaşam alanlarınıza sanat katıyoruz.',
+  craft_image: 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=800&q=80',
 };
 
 const DEFAULT_HOMEPAGE = {
@@ -56,7 +57,7 @@ async function fetchAboutSettings() {
   try {
     const { data } = await supabase
       .from('about_settings')
-      .select('story_title, story_p1, story_p2')
+      .select('story_title, story_p1, story_p2, craft_image')
       .eq('id', 1)
       .single();
     return { ...DEFAULT_ABOUT, ...(data ?? {}) };

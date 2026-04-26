@@ -19,6 +19,7 @@ interface AboutData {
   story_title: string;
   story_p1: string;
   story_p2: string;
+  craft_image: string;
 }
 
 interface HomepageData {
@@ -265,10 +266,11 @@ export default function HomeClient({ featured, banner, about, homepage }: HomeCl
           <ScrollReveal direction="right">
             <div className="relative h-100 md:h-130">
               <Image
-                src="https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=800&q=80"
+                src={about.craft_image}
                 alt="El yapımı seramik atölyesi - seramik üretim süreci"
                 fill
                 className="object-cover"
+                unoptimized={about.craft_image.startsWith('http')}
               />
             </div>
           </ScrollReveal>
