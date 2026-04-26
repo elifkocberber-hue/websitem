@@ -90,6 +90,7 @@ export default function AdminAboutPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [loadingCrop, setLoadingCrop] = useState(false);
   const [dragOver, setDragOver] = useState<'hero_image' | 'story_image' | 'craft_image' | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const heroFileInputRef = useRef<HTMLInputElement>(null);
@@ -116,6 +117,25 @@ export default function AdminAboutPage() {
 
   const set = (key: keyof AboutSettings) => (value: string) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
+
+  const loadForCrop = useCallback(async (imageUrl: string, field: 'hero_image' | 'story_image' | 'craft_image') => {
+    setLoadingCrop(true);
+    setActiveImageField(field);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/admin/proxy-image?url=${encodeURIComponent(imageUrl)}`);
+      const data = await res.json();
+      if (res.ok && data.dataUrl) {
+        setCropSrc(data.dataUrl);
+      } else {
+        setMessage({ type: 'error', text: 'Görsel kırpma için yüklenemedi' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Görsel kırpma için yüklenemedi' });
+    } finally {
+      setLoadingCrop(false);
+    }
+  }, []);
 
   const openFilePicker = (field: 'hero_image' | 'story_image' | 'craft_image') => {
     setActiveImageField(field);
@@ -294,6 +314,21 @@ export default function AdminAboutPage() {
                 />
               </div>
 
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => loadForCrop(settings.hero_image, 'hero_image')}
+                  disabled={loadingCrop || uploading}
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#DD6B56] border border-gray-300 hover:border-[#DD6B56] rounded-lg px-4 py-2 transition disabled:opacity-50"
+                >
+                  {loadingCrop && activeImageField === 'hero_image' ? (
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 002 2h14"/><path d="M18 22V8a2 2 0 00-2-2H2"/></svg>
+                  )}
+                  Mevcut görseli kırp
+                </button>
+              </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1.5">Ya da görsel URL&apos;si girin:</p>
                 <Field id="hero_image" label="" value={settings.hero_image} onChange={set('hero_image')} />
@@ -358,6 +393,21 @@ export default function AdminAboutPage() {
                 />
               </div>
 
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => loadForCrop(settings.story_image, 'story_image')}
+                  disabled={loadingCrop || uploading}
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#DD6B56] border border-gray-300 hover:border-[#DD6B56] rounded-lg px-4 py-2 transition disabled:opacity-50"
+                >
+                  {loadingCrop && activeImageField === 'story_image' ? (
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 002 2h14"/><path d="M18 22V8a2 2 0 00-2-2H2"/></svg>
+                  )}
+                  Mevcut görseli kırp
+                </button>
+              </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1.5">Ya da görsel URL&apos;si girin:</p>
                 <Field id="story_image" label="" value={settings.story_image} onChange={set('story_image')} />
@@ -422,6 +472,21 @@ export default function AdminAboutPage() {
                 />
               </div>
 
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => loadForCrop(settings.craft_image, 'craft_image')}
+                  disabled={loadingCrop || uploading}
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#DD6B56] border border-gray-300 hover:border-[#DD6B56] rounded-lg px-4 py-2 transition disabled:opacity-50"
+                >
+                  {loadingCrop && activeImageField === 'craft_image' ? (
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 002 2h14"/><path d="M18 22V8a2 2 0 00-2-2H2"/></svg>
+                  )}
+                  Mevcut görseli kırp
+                </button>
+              </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1.5">Ya da görsel URL&apos;si girin:</p>
                 <Field id="craft_image" label="" value={settings.craft_image} onChange={set('craft_image')} />
