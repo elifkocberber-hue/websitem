@@ -46,6 +46,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-3">
               <li><a href="mailto:elsdreamfactory@gmail.com" className="text-sm text-bone/60 hover:text-bone transition-colors">elsdreamfactory@gmail.com</a></li>
               <li className="text-sm text-bone/60">{t.footer.country}</li>
+              <li><Link href="/firma-bilgileri" className="text-sm text-bone/60 hover:text-bone transition-colors">Firma Bilgileri</Link></li>
             </ul>
           </div>
           <div>
