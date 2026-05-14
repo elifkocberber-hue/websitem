@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { getOrCreateUser, createOrder, createOrderItems } from '@/lib/supabase';
 import { validateCustomerData } from '@/lib/validation';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rateLimit';
 
@@ -39,7 +38,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate total price
     if (!totalPrice || totalPrice <= 0) {
       return NextResponse.json(
         { success: false, error: 'Geçersiz ödeme tutarı' },
@@ -47,7 +45,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate items array
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Geçersiz ürün bilgileri' },
@@ -57,7 +54,15 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.IYZICO_API_KEY || '';
     const secretKey = process.env.IYZICO_SECRET_KEY || '';
-    const baseUrl = process.env.IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
+    const baseUrl = process.env.IYZICO_BASE_URL;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://elsdreamfactory.com';
+
+    if (!baseUrl || !apiKey || !secretKey) {
+      return NextResponse.json(
+        { success: false, error: 'Ödeme servisi yapılandırılmamış. Lütfen site yöneticisi ile iletişime geçin.' },
+        { status: 503 }
+      );
+    }
 
     // Server-side fiyat doğrulaması — client'ın gönderdiği fiyata güvenme
     let verifiedTotal = 0;
@@ -69,7 +74,6 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!dbProduct) {
-        // Supabase'de yoksa yerel veriden kontrol et
         const { getCeramicProductById } = await import('@/data/ceramicProducts');
         const localProduct = getCeramicProductById(item.id);
         if (!localProduct) {
@@ -98,11 +102,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prepare payment payload
-    const conversationId = generateRandomId();
-    const requestId = generateRandomId();
-
-    // Validate card data from customer
     if (!customer.cardNumber || !customer.expireMonth || !customer.expireYear || !customer.cvc || !customer.cardHolderName) {
       return NextResponse.json(
         { success: false, error: 'Kart bilgileri eksik' },
@@ -110,28 +109,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get client IP from headers
     const clientIp =
       request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
       request.headers.get('cf-connecting-ip') ||
       request.headers.get('x-real-ip') ||
       '0.0.0.0';
 
+    const conversationId = generateRandomId();
+
+    // 3D Secure başlatma payload'ı
     const paymentPayload = {
       locale: 'tr',
-      conversationId: conversationId,
-      price: totalPrice.toFixed(2),
-      paidPrice: totalPrice.toFixed(2),
+      conversationId,
+      price: verifiedTotal.toFixed(2),
+      paidPrice: verifiedTotal.toFixed(2),
       currency: 'TRY',
       installment: '1',
       paymentChannel: 'WEB',
       paymentGroup: 'PRODUCT',
+      // Banka OTP sonrası iyzico'nun geri döneceği URL
+      callbackUrl: `${siteUrl}/api/payment/3ds-callback`,
       paymentCard: {
         cardHolderName: customer.cardHolderName,
         cardNumber: customer.cardNumber.replace(/\s/g, ''),
         expireMonth: customer.expireMonth,
         expireYear: customer.expireYear,
         cvc: customer.cvc,
+        registerCard: '0',
       },
       buyer: {
         id: generateRandomId(),
@@ -165,27 +169,24 @@ export async function POST(request: NextRequest) {
       basketItems: items.map((item: any) => ({
         id: item.id.toString(),
         name: item.name,
-        category1: item.category,
+        category1: item.category || 'Seramik',
         itemType: 'PHYSICAL',
         price: (item.price * item.quantity).toFixed(2),
       })),
     };
 
-    // Convert to JSON for signature
     const jsonPayload = JSON.stringify(paymentPayload);
-
-    // Generate signature
     const signature = generateSignature(jsonPayload, secretKey);
-    
-    // Encode API key to base64 for Authorization header
     const authorizationHeader = Buffer.from(apiKey).toString('base64');
 
-    // Make request to Iyzico
-    const response = await fetch(`${baseUrl}/payment/auth`, {
+    // 3D Secure başlatma isteği
+    const response = await fetch(`${baseUrl}/payment/3dsecure/initialize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `IyzipayV2 ${authorizationHeader}`,
+        'X-IyzipayV2-Client-Version': '1.0.0',
+        'X-Iyzi-Rnd': generateRandomId(),
         'X-IyzipayV2': signature,
       },
       body: jsonPayload,
@@ -193,72 +194,27 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
 
-    if (result.status === 'success') {
-      try {
-        // Create user in Supabase
-        const user = await getOrCreateUser(
-          customer.email,
-          customer.firstName,
-          customer.lastName
-        );
-
-        // Create order in Supabase
-        const order = await createOrder(
-          user.id,
-          totalPrice,
-          `${customer.address}, ${customer.city} ${customer.postalCode}`,
-          result.paymentId
-        );
-
-        // Create order items in Supabase
-        await createOrderItems(
-          order.id,
-          items.map((item: any) => ({
-            product_id: item.id,
-            product_name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-          }))
-        );
-
-        return NextResponse.json({
-          success: true,
-          paymentId: result.paymentId,
-          orderId: `ORD-${order.id.slice(0, 8).toUpperCase()}`,
-          message: 'Ödeme başarılı',
-        });
-      } catch (dbError) {
-        // Payment succeeded but database error - still return success to user
-        return NextResponse.json({
-          success: true,
-          paymentId: result.paymentId,
-          orderId: `ORD-${Date.now()}`,
-          message: 'Ödeme başarılı (sipariş kaydı başarısız, lütfen destek ile iletişime geçiniz)',
-        });
-      }
+    if (result.status === 'success' && result.threeDSHtmlContent) {
+      // iyzico banka OTP sayfasının HTML içeriğini döner;
+      // istemci bunu bir form olarak sayfaya yazıp otomatik submit eder.
+      return NextResponse.json({
+        success: true,
+        requires3DS: true,
+        threeDSHtmlContent: result.threeDSHtmlContent,
+        conversationId,
+      });
     } else {
-      // Hata kodunu belirle
       let errorCode = 'timeout';
       const errorMsg = result.errorMessage || '';
-      
-      if (errorMsg.includes('Kart reddedildi') || errorMsg.includes('declined')) {
-        errorCode = 'card_declined';
-      } else if (errorMsg.includes('yetersiz') || errorMsg.includes('insufficient')) {
-        errorCode = 'insufficient_funds';
-      } else if (errorMsg.includes('süresi') || errorMsg.includes('expired')) {
-        errorCode = 'expired_card';
-      } else if (errorMsg.includes('geçersiz') || errorMsg.includes('invalid')) {
-        errorCode = 'invalid_card';
-      } else if (errorMsg.includes('ağ') || errorMsg.includes('network')) {
-        errorCode = 'network_error';
-      }
+
+      if (errorMsg.includes('Kart reddedildi') || errorMsg.includes('declined')) errorCode = 'card_declined';
+      else if (errorMsg.includes('yetersiz') || errorMsg.includes('insufficient')) errorCode = 'insufficient_funds';
+      else if (errorMsg.includes('süresi') || errorMsg.includes('expired')) errorCode = 'expired_card';
+      else if (errorMsg.includes('geçersiz') || errorMsg.includes('invalid')) errorCode = 'invalid_card';
+      else if (errorMsg.includes('ağ') || errorMsg.includes('network')) errorCode = 'network_error';
 
       return NextResponse.json(
-        {
-          success: false,
-          errorCode: errorCode,
-          error: result.errorMessage || 'Ödeme başarısız oldu',
-        },
+        { success: false, errorCode, error: result.errorMessage || 'Ödeme başlatılamadı' },
         { status: 400 }
       );
     }
@@ -273,7 +229,7 @@ export async function POST(request: NextRequest) {
 // Handle CORS preflight requests
 export async function OPTIONS(request: NextRequest) {
   const response = new NextResponse();
-  
+
   const origin = request.headers.get('origin');
   const allowedOrigins = [
     process.env.NEXT_PUBLIC_APP_URL,

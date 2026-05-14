@@ -88,13 +88,22 @@ export default function ReturnsPage() {
           <h2 className="heading-serif text-xl text-charcoal mb-3">6. İade Ödemesi</h2>
           <p>
             İade onaylandıktan sonra ödeme tutarı, ödeme yaptığınız yönteme göre{' '}
-            <strong>10 iş günü</strong> içinde hesabınıza iade edilir.
+            <strong>14 (on dört) gün</strong> içinde iade edilir (6502 Sayılı TKHK Md.15 gereği).
           </p>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc pl-6 space-y-2 mt-3">
             <li>Kredi kartı ile yapılan ödemeler kredi kartınıza iade edilir.</li>
             <li>İade kargo ücreti, ürün kusurlu/hasarlı değilse alıcıya aittir.</li>
             <li>Kargoda hasar gören ürünlerin iade kargo ücreti tarafımızca karşılanır.</li>
           </ul>
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-charcoal/80 leading-relaxed">
+              <strong>iyzico ile yapılan ödemelerde:</strong> İade talebiniz iyzico sistemine iletilir ve
+              işlem başlatılır. Tutarın kartınıza yansıması, kart sahibi bankanızın işlem döngüsüne bağlı
+              olup genellikle <strong>3–10 iş günü</strong> sürmektedir. Bu süre tarafımızdan değil,
+              bankanızdan kaynaklanmaktadır; herhangi bir sorun yaşarsanız öncelikle bankanızın müşteri
+              hizmetleri ile iletişime geçebilirsiniz.
+            </p>
+          </div>
         </section>
 
         <section>

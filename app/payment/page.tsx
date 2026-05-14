@@ -26,6 +26,7 @@ export default function PaymentPage() {
     expireYear: '',
     cvc: '',
   });
+  const [mssAccepted, setMssAccepted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -78,22 +79,36 @@ export default function PaymentPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        const orderId = data.orderId || 'ORD-' + Date.now();
-        const date = new Date().toLocaleDateString('tr-TR');
-
-        // Purchase event'i için snapshot sakla (thank-you sayfasında tetiklenir)
+      if (data.success && data.requires3DS && data.threeDSHtmlContent) {
+        // Purchase event snapshot'ı kaydet (thank-you sayfasında tetiklenir)
         sessionStorage.setItem('last_purchase', JSON.stringify({
-          orderId,
+          orderId: 'pending',
           items: items.map(i => ({ id: i.id, quantity: i.quantity })),
           totalPrice,
           eventId: generateEventId(),
         }));
 
         clearCart();
+
+        // iyzico'nun 3DS HTML'ini DOM'a yaz ve otomatik submit et
+        const container = document.createElement('div');
+        container.innerHTML = data.threeDSHtmlContent;
+        document.body.appendChild(container);
+        const form = container.querySelector('form');
+        if (form) form.submit();
+      } else if (data.success) {
+        // 3DS olmaksızın direkt başarı (sandbox bazı senaryolarda)
+        const orderId = data.orderId || 'ORD-' + Date.now();
+        const date = new Date().toLocaleDateString('tr-TR');
+        sessionStorage.setItem('last_purchase', JSON.stringify({
+          orderId,
+          items: items.map(i => ({ id: i.id, quantity: i.quantity })),
+          totalPrice,
+          eventId: generateEventId(),
+        }));
+        clearCart();
         router.push(`/thank-you?orderId=${orderId}&date=${encodeURIComponent(date)}`);
       } else {
-        // Hata nedenini belirle ve başarısız sayfasına yönlendir
         const errorReason = data.errorCode || 'timeout';
         router.push(`/payment-failed?reason=${errorReason}`);
       }
@@ -338,11 +353,31 @@ export default function PaymentPage() {
                   </p>
                 </div>
 
+                {/* MSS & Ön Bilgi Formu Onayı (TKHK Md.48 zorunlu) */}
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={mssAccepted}
+                      onChange={(e) => setMssAccepted(e.target.checked)}
+                      required
+                      className="mt-1 w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500 shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <a href="/mesafeli-satis-sozlesmesi" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">Mesafeli Satış Sözleşmesi</a>&apos;ni
+                      ve{' '}
+                      <a href="/returns" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">İade Politikası</a>&apos;nı
+                      okudum, anladım ve onaylıyorum.
+                      <span className="text-red-500 ml-1">*</span>
+                    </span>
+                  </label>
+                </div>
+
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  disabled={loading || !mssAccepted}
+                  className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors"
                 >
                   {loading ? 'İşleniyor...' : `${totalPrice.toFixed(2)} ₺ Ödeme Yap`}
                 </button>

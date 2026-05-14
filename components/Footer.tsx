@@ -36,6 +36,7 @@ export const Footer: React.FC = () => {
               <li><Link href="/cookie-policy" className="text-sm text-bone/60 hover:text-bone transition-colors">{t.footer.cookie}</Link></li>
               <li><Link href="/terms" className="text-sm text-bone/60 hover:text-bone transition-colors">{t.footer.terms}</Link></li>
               <li><Link href="/returns" className="text-sm text-bone/60 hover:text-bone transition-colors">{t.footer.returns}</Link></li>
+              <li><Link href="/mesafeli-satis-sozlesmesi" className="text-sm text-bone/60 hover:text-bone transition-colors">Mesafeli Satış Sözleşmesi</Link></li>
               <li><Link href="/faq" className="text-sm text-bone/60 hover:text-bone transition-colors">{t.footer.faq}</Link></li>
             </ul>
           </div>
@@ -76,6 +77,19 @@ export const Footer: React.FC = () => {
             height={36}
             className="h-8 w-auto opacity-90"
           />
+        </div>
+
+        {/* Yasal Kimlik Bilgileri (iyzico Madde 4.2.k) */}
+        <div className="border-t border-bone/10 pt-8 mb-8">
+          <p className="text-[10px] tracking-[0.15em] uppercase text-clay mb-3">Satıcı Bilgileri</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-1 text-[11px] text-bone/40 leading-relaxed">
+            <p><span className="text-bone/60">Ticaret Unvanı:</span> ELİF GÜLNİHAL KOÇBERBER YETKİN</p>
+            <p><span className="text-bone/60">Vergi Dairesi / No:</span> ERENKÖY VD – 5730473467</p>
+            <p><span className="text-bone/60">Adres:</span> Erenköy Mah. Gülbahçe Sk. No:11 D:28 Kadıköy/İstanbul</p>
+            <p><span className="text-bone/60">MERSİS No:</span> <span className="italic">[Tescil sonrası eklenecek]</span></p>
+            <p><span className="text-bone/60">KEP:</span> <span className="italic">[KEP adresi eklenecek]</span></p>
+            <p><span className="text-bone/60">E-posta:</span> elsdreamfactory@gmail.com</p>
+          </div>
         </div>
 
         {/* Bottom */}
