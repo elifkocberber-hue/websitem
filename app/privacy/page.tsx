@@ -40,7 +40,7 @@ export default function PrivacyPage() {
             <p><strong>Ticaret Unvanı:</strong> ELİF KOÇBERBER DESIGN HOUSE</p>
             <p><strong>Vergi Dairesi / No:</strong> Erenköy Vergi Dairesi Müd. – 5730473467</p>
             <p><strong>Sicil No:</strong> 982174</p>
-            <p><strong>Adres:</strong> Erenköy Mah. Gülbahçe Sk. No:11 D:28 Kadıköy/İstanbul</p>
+            <p><strong>Adres:</strong> Erenköy Mah. Gülbahçe Sk. No:11/28 Kadıköy/İstanbul</p>
             <p><strong>E-posta:</strong> elsdreamfactory@gmail.com</p>
             <p><strong>Web:</strong> elsdreamfactory.com</p>
           </div>

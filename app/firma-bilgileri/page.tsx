@@ -39,10 +39,6 @@ export default function FirmaBilgileriPage() {
                 @elsdreamfactory
               </a>
             </div>
-            <div className="flex gap-4">
-              <span className="w-32 shrink-0 text-sm text-earth/60">Ülke</span>
-              <span className="text-sm">Türkiye</span>
-            </div>
           </div>
         </section>
 
@@ -68,7 +64,7 @@ export default function FirmaBilgileriPage() {
             </div>
             <div className="flex gap-4">
               <span className="w-32 shrink-0 text-sm text-earth/60">Adres</span>
-              <span className="text-sm">Erenköy Mah. Gülbahçe Sk. No:11 D:28 Kadıköy/İstanbul</span>
+              <span className="text-sm">Erenköy Mah. Gülbahçe Sk. No:11/28 Kadıköy/İstanbul</span>
             </div>
           </div>
         </section>
