@@ -37,11 +37,10 @@ export default function PrivacyPage() {
         <section className="mb-10">
           <h2 className="text-xl font-bold text-gray-900 mb-3">1. Veri Sorumlusu</h2>
           <div className="bg-stone-50 rounded-xl p-6 space-y-1 text-gray-600 leading-relaxed">
-            <p><strong>Ticaret Unvanı:</strong> ELİF GÜLNİHAL KOÇBERBER YETKİN</p>
+            <p><strong>Ticaret Unvanı:</strong> ELİF KOÇBERBER DESIGN HOUSE</p>
             <p><strong>Vergi Dairesi / No:</strong> Erenköy Vergi Dairesi Müd. – 5730473467</p>
+            <p><strong>Sicil No:</strong> 982174</p>
             <p><strong>Adres:</strong> Erenköy Mah. Gülbahçe Sk. No:11 D:28 Kadıköy/İstanbul</p>
-            <p><strong>MERSİS No:</strong> <span className="italic text-gray-400">[Tescil sonrası eklenecek]</span></p>
-            <p><strong>KEP:</strong> <span className="italic text-gray-400">[KEP adresi eklenecek]</span></p>
             <p><strong>E-posta:</strong> elsdreamfactory@gmail.com</p>
             <p><strong>Web:</strong> elsdreamfactory.com</p>
           </div>

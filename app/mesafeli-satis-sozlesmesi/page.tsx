@@ -28,11 +28,10 @@ export default function MesafeliSatisSozlesmesiPage() {
             <div className="bg-stone-50 rounded-xl p-6">
               <p className="font-semibold text-gray-900 mb-3">SATICI</p>
               <div className="space-y-1 text-gray-600 text-sm">
-                <p><strong>Ticaret Unvanı:</strong> ELİF GÜLNİHAL KOÇBERBER YETKİN</p>
+                <p><strong>Ticaret Unvanı:</strong> ELİF KOÇBERBER DESIGN HOUSE</p>
                 <p><strong>Vergi Dairesi / No:</strong> Erenköy Vergi Dairesi Müd. – 5730473467</p>
+                <p><strong>Sicil No:</strong> 982174</p>
                 <p><strong>Adres:</strong> Erenköy Mah. Gülbahçe Sk. No:11 D:28 Kadıköy/İstanbul</p>
-                <p><strong>MERSİS No:</strong> <span className="italic text-gray-400">[Tescil sonrası eklenecek]</span></p>
-                <p><strong>KEP:</strong> <span className="italic text-gray-400">[KEP adresi eklenecek]</span></p>
                 <p><strong>E-posta:</strong> elsdreamfactory@gmail.com</p>
                 <p><strong>Web:</strong> elsdreamfactory.com</p>
               </div>

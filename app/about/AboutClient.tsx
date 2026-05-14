@@ -170,6 +170,22 @@ export default function AboutClient({ about }: { about: AboutSettings | null }) 
           </Link>
         </ScrollReveal>
       </section>
+
+      {/* ═══════ FİRMA BİLGİLERİ ═══════ */}
+      <section className="max-w-350 mx-auto px-6 md:px-10 pb-20">
+        <ScrollReveal>
+          <div className="border-t border-earth/20 pt-10">
+            <p className="text-xs tracking-[0.2em] uppercase text-earth mb-5">Firma Bilgileri</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-2 text-sm text-earth/70 leading-relaxed">
+              <p><span className="text-charcoal/60">Ticaret Unvanı:</span> ELİF KOÇBERBER DESIGN HOUSE</p>
+              <p><span className="text-charcoal/60">Vergi Dairesi / No:</span> Erenköy VD – 5730473467</p>
+              <p><span className="text-charcoal/60">Sicil No:</span> 982174</p>
+              <p><span className="text-charcoal/60">Adres:</span> Erenköy Mah. Gülbahçe Sk. No:11 D:28 Kadıköy/İstanbul</p>
+              <p><span className="text-charcoal/60">E-posta:</span> elsdreamfactory@gmail.com</p>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
     </>
   );
 }
