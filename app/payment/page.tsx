@@ -354,40 +354,21 @@ export default function PaymentPage() {
                   </p>
                 </div>
 
-                {/* Ön Bilgilendirme Formu Onayı (TKHK Md.48) */}
-                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={onBilgiAccepted}
-                      onChange={(e) => setOnBilgiAccepted(e.target.checked)}
-                      required
-                      className="mt-1 w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500 shrink-0"
-                    />
-                    <span className="text-sm text-gray-700 leading-relaxed">
-                      Sipariş özetini, teslimat süresini (3–7 iş günü), toplam tutarı ve{' '}
-                      <a href="/returns" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">14 günlük cayma hakkımı</a>{' '}
-                      içeren <strong>Ön Bilgilendirme Formu</strong>&apos;nu okudum ve onaylıyorum.
-                      <span className="text-red-500 ml-1">*</span>
-                    </span>
-                  </label>
-                </div>
-
-                {/* MSS Onayı (TKHK Md.48 zorunlu) */}
+                {/* Ön Bilgilendirme + MSS Onayı (TKHK Md.48) */}
                 <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={mssAccepted}
-                      onChange={(e) => setMssAccepted(e.target.checked)}
+                      onChange={(e) => { setMssAccepted(e.target.checked); setOnBilgiAccepted(e.target.checked); }}
                       required
                       className="mt-1 w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500 shrink-0"
                     />
                     <span className="text-sm text-gray-700 leading-relaxed">
+                      <a href="/returns" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">Ön Bilgilendirme Koşulları</a>&apos;nı
+                      {' '}ve{' '}
                       <a href="/mesafeli-satis-sozlesmesi" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">Mesafeli Satış Sözleşmesi</a>&apos;ni
-                      ve{' '}
-                      <a href="/returns" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">İade Politikası</a>&apos;nı
-                      okudum, anladım ve onaylıyorum.
+                      {' '}okudum, onaylıyorum.
                       <span className="text-red-500 ml-1">*</span>
                     </span>
                   </label>
