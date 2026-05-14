@@ -21,6 +21,7 @@ interface OrderDetail {
   status: string;
   payment_id: string;
   shipping_address: string;
+  tracking_number?: string;
   created_at: string;
   updated_at: string;
   users: {
@@ -44,6 +45,8 @@ export default function OrderDetailPage() {
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
   const [newStatus, setNewStatus] = useState('');
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [trackingUpdating, setTrackingUpdating] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -69,10 +72,30 @@ export default function OrderDetailPage() {
       const data = await response.json();
       setOrder(data.order);
       setNewStatus(data.order.status);
+      setTrackingNumber(data.order.tracking_number || '');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bir hata oluştu');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTrackingUpdate = async () => {
+    if (!order || !trackingNumber.trim()) return;
+    try {
+      setTrackingUpdating(true);
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tracking_number: trackingNumber.trim() }),
+      });
+      if (!response.ok) throw new Error('Kargo numarası güncellenemedi');
+      const data = await response.json();
+      setOrder(data.order);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bir hata oluştu');
+    } finally {
+      setTrackingUpdating(false);
     }
   };
 
@@ -185,6 +208,7 @@ export default function OrderDetailPage() {
                   <select
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value)}
+                    title="Sipariş durumu"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   >
                     <option value="pending">Beklemede</option>
@@ -195,6 +219,7 @@ export default function OrderDetailPage() {
                   </select>
                 </div>
                 <button
+                  type="button"
                   onClick={handleStatusUpdate}
                   disabled={updating || newStatus === order.status}
                   className="bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded-lg transition"
@@ -208,6 +233,43 @@ export default function OrderDetailPage() {
                   {getStatusTurk(order.status)}
                 </span>
               </div>
+            </div>
+
+            {/* Kargo Takip Numarası */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Kargo Takip Numarası</h2>
+              {order.tracking_number && (
+                <div className="mb-4 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                  <p className="text-sm text-gray-600 mb-1">Mevcut takip numarası</p>
+                  <p className="font-mono font-bold text-green-800">{order.tracking_number}</p>
+                </div>
+              )}
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label htmlFor="tracking-number" className="block text-sm font-medium text-gray-700 mb-2">
+                    {order.tracking_number ? 'Takip Numarasını Güncelle' : 'Takip Numarası Gir'}
+                  </label>
+                  <input
+                    id="tracking-number"
+                    type="text"
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    placeholder="örn. 1234567890"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleTrackingUpdate}
+                  disabled={trackingUpdating || !trackingNumber.trim()}
+                  className="bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded-lg transition"
+                >
+                  {trackingUpdating ? 'Gönderiliyor...' : 'Kaydet & Bildir'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Kaydettiğinizde müşteriye otomatik e-posta gönderilir.
+              </p>
             </div>
 
             {/* Customer Info */}

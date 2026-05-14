@@ -85,25 +85,71 @@ export async function PATCH(
 
     const { id } = await params;
     const orderId = id;
-    const { status } = await request.json();
+    const body = await request.json();
+    const { status, tracking_number } = body;
 
-    const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: 'Geçersiz durum' },
-        { status: 400 }
-      );
+    if (status !== undefined) {
+      const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return NextResponse.json({ error: 'Geçersiz durum' }, { status: 400 });
+      }
     }
+
+    const updatePayload: Record<string, any> = { updated_at: new Date().toISOString() };
+    if (status !== undefined) updatePayload.status = status;
+    if (tracking_number !== undefined) updatePayload.tracking_number = tracking_number;
 
     const { data, error } = await supabase
       .from('orders')
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', orderId)
       .select()
       .single();
+
+    // Kargo takip numarası girildiğinde müşteriye e-posta gönder
+    if (!error && tracking_number && data) {
+      try {
+        const { data: orderWithUser } = await supabase
+          .from('orders')
+          .select('users:user_id(email, first_name, last_name)')
+          .eq('id', orderId)
+          .single();
+
+        const userInfo = orderWithUser?.users as any;
+        const customerEmail = Array.isArray(userInfo) ? userInfo[0]?.email : userInfo?.email;
+        const customerName = Array.isArray(userInfo)
+          ? `${userInfo[0]?.first_name} ${userInfo[0]?.last_name}`.trim()
+          : `${userInfo?.first_name} ${userInfo?.last_name}`.trim();
+
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey && customerEmail) {
+          const { Resend } = await import('resend');
+          const resend = new Resend(resendKey);
+          await resend.emails.send({
+            from: "El's Dream Factory <noreply@elsdreamfactory.com>",
+            to: customerEmail,
+            subject: 'Siparişiniz Kargoya Verildi!',
+            html: `
+              <div style="font-family:Georgia,serif;max-width:580px;margin:0 auto;color:#2C2C2C;line-height:1.7;">
+                <h2 style="font-size:22px;font-weight:normal;">Siparişiniz Yola Çıktı!</h2>
+                <p>Merhaba ${customerName},</p>
+                <p>Siparişiniz kargoya verilmiştir. Kargo takip numaranız:</p>
+                <div style="background:#5C0A1A;color:#fff;padding:16px 24px;border-radius:8px;margin:20px 0;font-size:20px;letter-spacing:0.12em;font-weight:bold;text-align:center;">
+                  ${tracking_number}
+                </div>
+                <p>Bu numarayı kargo şirketinin web sitesi veya uygulaması üzerinden takip edebilirsiniz.</p>
+                <p>Teslimattan itibaren <strong>14 gün</strong> içinde cayma hakkınızı kullanabilirsiniz.</p>
+                <hr style="border:none;border-top:1px solid #E8E0D8;margin:24px 0;" />
+                <p style="color:#9B8E85;font-size:12px;">
+                  Sorularınız için: <a href="mailto:elsdreamfactory@gmail.com" style="color:#5C0A1A;">elsdreamfactory@gmail.com</a><br/>
+                  El's Dream Factory — ELİF KOÇBERBER DESIGN HOUSE
+                </p>
+              </div>
+            `,
+          });
+        }
+      } catch { /* e-posta hatası güncellemeyi etkilemez */ }
+    }
 
     if (error) {
       return NextResponse.json(

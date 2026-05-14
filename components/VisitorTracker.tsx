@@ -3,6 +3,18 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 
+function hasAnalyticsConsent(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const prefs = localStorage.getItem('cookie_preferences');
+    if (!prefs) return false;
+    const parsed = JSON.parse(prefs);
+    return parsed.analytics === true;
+  } catch {
+    return false;
+  }
+}
+
 function getSessionId() {
   if (typeof window === 'undefined') return '';
   let sessionId = sessionStorage.getItem('visitor_session_id');
@@ -22,6 +34,7 @@ export function VisitorTracker() {
   // Süreyi gönder (sayfa değişimi veya sekme kapanışı)
   const sendDuration = useCallback(() => {
     if (!currentVisitorId.current || !pageEntryTime.current) return;
+    if (!hasAnalyticsConsent()) return;
     const duration = Math.round((Date.now() - pageEntryTime.current) / 1000);
     if (duration < 1 || duration > 7200) return; // 1sn-2saat arası geçerli
 
@@ -54,6 +67,8 @@ export function VisitorTracker() {
   useEffect(() => {
     // Admin sayfalarını takip etme
     if (pathname.startsWith('/admin')) return;
+    // Analitik çerez onayı yoksa takip etme
+    if (!hasAnalyticsConsent()) return;
     // Aynı sayfayı tekrar takip etme
     if (lastTracked.current === pathname) return;
 

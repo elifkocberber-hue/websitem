@@ -28,6 +28,7 @@ export interface Order {
   status: string;
   payment_id: string;
   shipping_address: string;
+  tracking_number?: string;
   created_at: string;
   updated_at: string;
 }

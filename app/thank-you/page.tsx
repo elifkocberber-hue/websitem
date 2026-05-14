@@ -100,7 +100,7 @@ function ThankYouContent() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold mt-0.5">4.</span>
-                  <span>Teslimattan sonra 30 gün içinde iade edebilirsiniz</span>
+                  <span>Teslimattan itibaren 14 gün içinde cayma hakkınızı kullanabilirsiniz</span>
                 </li>
               </ul>
             </div>

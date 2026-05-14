@@ -27,6 +27,7 @@ export default function PaymentPage() {
     cvc: '',
   });
   const [mssAccepted, setMssAccepted] = useState(false);
+  const [onBilgiAccepted, setOnBilgiAccepted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -353,7 +354,26 @@ export default function PaymentPage() {
                   </p>
                 </div>
 
-                {/* MSS & Ön Bilgi Formu Onayı (TKHK Md.48 zorunlu) */}
+                {/* Ön Bilgilendirme Formu Onayı (TKHK Md.48) */}
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={onBilgiAccepted}
+                      onChange={(e) => setOnBilgiAccepted(e.target.checked)}
+                      required
+                      className="mt-1 w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500 shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      Sipariş özetini, teslimat süresini (3–7 iş günü), toplam tutarı ve{' '}
+                      <a href="/returns" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline font-medium">14 günlük cayma hakkımı</a>{' '}
+                      içeren <strong>Ön Bilgilendirme Formu</strong>&apos;nu okudum ve onaylıyorum.
+                      <span className="text-red-500 ml-1">*</span>
+                    </span>
+                  </label>
+                </div>
+
+                {/* MSS Onayı (TKHK Md.48 zorunlu) */}
                 <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
@@ -376,7 +396,7 @@ export default function PaymentPage() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={loading || !mssAccepted}
+                  disabled={loading || !mssAccepted || !onBilgiAccepted}
                   className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors"
                 >
                   {loading ? 'İşleniyor...' : `${totalPrice.toFixed(2)} ₺ Ödeme Yap`}
